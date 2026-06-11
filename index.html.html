@@ -1,0 +1,3261 @@
+<!DOCTYPE html>
+<html lang="en" data-version="2.0">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0f1c33" />
+<meta name="description" content="AI Task Navigator 2.0 — find the right AI tool for your task, see AI Power Rankings, compare free vs paid, and copy editable prompts you can use right away." />
+<title>AI Task Navigator 2.0 — Find the Right AI Tool for the Task</title>
+
+<style>
+  /* =========================================================
+     AI Task Navigator 2.0
+     Mobile-first, professional, accessible single-file app.
+     Palette: cream background, navy text, gold accents.
+     New in 2.0: AI Power Rankings, merged Tools view,
+                 quick search on Task Finder, dismiss button,
+                 improved mobile tab bar.
+     ========================================================= */
+
+  /* ---------- Design tokens ---------- */
+  :root {
+    --bg: #fbf8f1;
+    --bg-elev: #ffffff;
+    --ink: #0f1c33;
+    --ink-soft: #2a3552;
+    --muted: #5a6478;
+    --line: #e6e1d4;
+    --card: #f3eee2;
+    --card-2: #efe9d8;
+    --gold: #c8983b;
+    --gold-deep: #a87d27;
+    --gold-soft: #f5e9c9;
+    --green: #1f7a4d;
+    --green-soft: #e3f3ea;
+    --amber: #a96a00;
+    --amber-soft: #fdecc8;
+    --danger: #b3261e;
+    --focus: #2563eb;
+
+    /* Power Rankings tier colors */
+    --rank-great: #1a5c38;
+    --rank-great-bg: #e2f4eb;
+    --rank-great-border: #a8d8bc;
+    --rank-good: #7a5200;
+    --rank-good-bg: #fff3d6;
+    --rank-good-border: #d4a93a;
+    --rank-learning: #3a4a6a;
+    --rank-learning-bg: #edf0f8;
+    --rank-learning-border: #b0bacc;
+
+    --radius-sm: 10px;
+    --radius: 14px;
+    --radius-lg: 20px;
+
+    --shadow-sm: 0 2px 10px rgba(15,28,51,0.05);
+    --shadow:    0 8px 32px rgba(0,0,0,0.06);
+    --shadow-lg: 0 16px 44px rgba(15,28,51,0.13);
+
+    /* Glassmorphism surface tokens (2.1) */
+    --glass-bg: rgba(255,255,255,0.72);
+    --glass-border: rgba(255,255,255,0.55);
+    --glass-blur: blur(12px);
+
+    --font-display: "Fraunces","Cormorant Garamond",Georgia,"Times New Roman",serif;
+    --font-body: "Public Sans","Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+
+    --maxw: 1100px;
+    --header-h: 60px;
+    --tabbar-h: 64px;
+  }
+
+  /* ---------- Reset / base ---------- */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: linear-gradient(180deg, #FBF8F2 0%, #F5EFE3 100%);
+    background-attachment: fixed;
+    line-height: 1.55;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom,0));
+  }
+  h1,h2,h3,h4 {
+    font-family: var(--font-display);
+    color: var(--ink);
+    margin: 0 0 var(--space-3);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+  h1 { font-size: clamp(1.9rem,5vw,2.6rem); }
+  h2 { font-size: clamp(1.5rem,4vw,2rem); }
+  h3 { font-size: 1.15rem; font-weight: 600; }
+  p  { margin: 0 0 var(--space-3); color: var(--ink-soft); }
+  a  { color: var(--gold-deep); text-decoration: underline; text-underline-offset: 3px; }
+
+  .skip-link {
+    position: absolute; left: -9999px; top: 0;
+    background: var(--ink); color: #fff; padding: 10px 16px;
+    border-radius: 0 0 8px 0; z-index: 200;
+  }
+  .skip-link:focus { left: 0; outline: 3px solid var(--gold); }
+
+  :where(button,a,[tabindex],input,textarea,select):focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  /* ---------- Header ---------- */
+  .site-header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(251,248,241,0.92);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .header-inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    height: var(--header-h);
+    padding: 0 var(--space-4);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+  }
+  .brand-mark {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg,var(--ink) 0%,#1a2a4a 100%);
+    color: var(--gold);
+    display: grid; place-items: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: inset 0 0 0 1px rgba(200,152,59,0.35);
+    flex-shrink: 0;
+  }
+  .brand small {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  /* Version pill in header */
+  .version-pill {
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: var(--gold-soft);
+    color: var(--gold-deep);
+    border: 1px solid rgba(200,152,59,0.4);
+    padding: 2px 7px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+
+  /* Desktop nav */
+  .nav-desktop { display: none; gap: 4px; }
+  .nav-desktop button {
+    background: transparent; border: 0;
+    color: var(--ink-soft);
+    font: 500 0.88rem var(--font-body);
+    padding: 7px 11px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .nav-desktop button:hover { background: var(--card); color: var(--ink); }
+  .nav-desktop button[aria-current="page"] { background: var(--ink); color: #fff; }
+
+  @media (min-width: 880px) {
+    .nav-desktop { display: flex; }
+    body { padding-bottom: 0; }
+    .tabbar { display: none !important; }
+  }
+
+  /* ---------- Bottom tab bar — 8 items ---------- */
+  .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: var(--bg-elev);
+    border-top: 1px solid var(--line);
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom,0);
+    box-shadow: 0 -2px 14px rgba(15,28,51,0.06);
+  }
+  .tabbar-inner {
+    display: grid;
+    grid-template-columns: repeat(8,1fr);
+    height: var(--tabbar-h);
+  }
+  .tabbar button {
+    background: transparent; border: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px;
+    color: var(--muted);
+    font: 500 8.5px var(--font-body);
+    cursor: pointer;
+    padding: 4px 1px;
+    min-height: 44px;
+  }
+  .tabbar button svg { width: 18px; height: 18px; stroke-width: 1.8; }
+  .tabbar button[aria-current="page"] { color: var(--ink); }
+  .tabbar button[aria-current="page"] svg { stroke: var(--gold-deep); }
+
+  /* ---------- Layout ---------- */
+  main { max-width: var(--maxw); margin: 0 auto; padding: var(--space-5) var(--space-4) var(--space-7); }
+  .view { display: none; animation: fadeIn .25s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gold-deep);
+    font-weight: 600;
+    margin-bottom: var(--space-3);
+  }
+  .section-lead { color: var(--ink-soft); font-size: 1.02rem; max-width: 60ch; }
+  .section-head { margin-bottom: var(--space-5); }
+
+  /* ---------- Buttons ----------
+     Shared baseline: 52px height, 12px radius, 600 weight, 14/22 padding.
+     Each tier has its own color, shadow, hover, focus, and active state.
+     Height is set by min-height + padding — not fixed height — so content
+     is never clipped on small screens or when text wraps.
+  ------------------------------------------------------------ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.25;
+    padding: 14px 22px;
+    border-radius: 12px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    min-height: 52px;
+    white-space: nowrap;
+    transition:
+      background   .14s ease,
+      color        .14s ease,
+      border-color .14s ease,
+      box-shadow   .14s ease,
+      transform    .10s ease;
+  }
+  .btn:active { transform: translateY(1px) !important; box-shadow: none !important; }
+
+  /* ── Primary ── Gold background */
+  .btn-gold {
+    background: var(--gold);
+    color: #1a1408;
+    border-color: var(--gold-deep);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.40),
+      0 4px 14px rgba(168,125,39,0.30);
+  }
+  .btn-gold:hover {
+    background: var(--gold-deep);
+    color: #fff;
+    border-color: var(--gold-deep);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(168,125,39,0.36);
+  }
+  .btn-gold:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+
+  /* ── Secondary ── Navy background */
+  .btn-ink {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+  .btn-ink:hover {
+    background: #1a2a4a;
+    border-color: #1a2a4a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15,28,51,0.24);
+  }
+  .btn-ink:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+
+  /* ── Tertiary ── Outline */
+  .btn-outline {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+  .btn-outline:hover {
+    background: var(--ink);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15,28,51,0.18);
+  }
+  .btn-outline:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+
+  /* ── Ghost ── Used outside hero (copy buttons, filters, etc.) */
+  .btn-ghost {
+    background: var(--bg-elev);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .btn-ghost:hover { background: var(--card); }
+
+  /* ── Size modifier ── */
+  .btn-sm {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    min-height: 36px;
+  }
+
+  /* ── Featured ── Prompt Studio CTA
+     Same height and radius as siblings. Visually distinct via
+     gold gradient + border. Two-line content centered vertically.
+  ---------------------------------------------------------------- */
+  .btn-studio {
+    background: linear-gradient(150deg, #fffdf7 0%, var(--gold-soft) 100%);
+    border-color: var(--gold);
+    color: var(--gold-deep);
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 22px;           /* slightly less vertical pad — subtitle accounts for height */
+    min-height: 52px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.70),
+      0 2px 8px rgba(168,125,39,0.16);
+    transition:
+      background   .16s ease,
+      border-color .16s ease,
+      box-shadow   .16s ease,
+      transform    .14s ease;
+  }
+  .btn-studio:hover {
+    background: linear-gradient(150deg, var(--gold-soft) 0%, #edd98e 100%);
+    border-color: var(--gold-deep);
+    color: var(--gold-deep);
+    transform: translateY(-3px);
+    box-shadow:
+      0 10px 24px rgba(168,125,39,0.28),
+      0 0 0 3px rgba(200,152,59,0.15);
+  }
+  .btn-studio:active { transform: translateY(0) !important; }
+  .btn-studio:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+  .btn-studio-main {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.2;
+    font-family: var(--font-body);
+  }
+  .btn-studio-main .arrow {
+    display: inline-block;
+    transition: transform .18s ease;
+  }
+  .btn-studio:hover .btn-studio-main .arrow { transform: translateX(4px); }
+  .btn-studio-sub {
+    font-size: 0.71rem;
+    font-weight: 400;
+    color: var(--amber);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    font-family: var(--font-body);
+  }
+
+  /* ── Hero action grid
+     Mobile:  1 column, 14px gap
+     Tablet:  2 columns, 14px gap
+     Desktop: 4 auto columns, 16px gap, start-aligned
+     align-items: stretch so all buttons fill the row height equally.
+  ---------------------------------------------------------------- */
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: var(--space-5);
+    align-items: stretch;
+  }
+  @media (min-width: 560px) {
+    .hero-actions { grid-template-columns: repeat(2,1fr); gap: 14px; }
+  }
+  @media (min-width: 880px) {
+    .hero-actions { grid-template-columns: repeat(4,auto); justify-content: start; gap: 16px; }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    background:
+      radial-gradient(680px 300px at 100% -8%, rgba(200,152,59,0.32), rgba(200,152,59,0.10) 42%, transparent 66%),
+      radial-gradient(900px 380px at 110% -10%,rgba(200,152,59,0.18),transparent 60%),
+      radial-gradient(700px 400px at -10% 0%,rgba(15,28,51,0.06),transparent 55%),
+      var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6) var(--space-5);
+    margin-bottom: var(--space-6);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .hero::after {
+    content: "";
+    position: absolute; right: -50px; top: -70px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle,rgba(200,152,59,0.40),rgba(200,152,59,0.12) 45%,transparent 72%);
+    filter: blur(14px);
+    pointer-events: none;
+  }
+  .hero h1 .accent { color: var(--gold-deep); font-style: italic; }
+  .hero p.lead { font-size: 1.05rem; max-width: 56ch; }
+  @media (min-width: 880px) {
+    .hero { padding: var(--space-7) var(--space-6); }
+  }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .card-hover { cursor: pointer; }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(200,152,59,0.5);
+  }
+  .grid { display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+  @media (min-width: 560px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 880px) { .grid-3 { grid-template-columns: repeat(3,1fr); } }
+  @media (min-width: 880px) { .grid-4 { grid-template-columns: repeat(4,1fr); } }
+
+  .feature-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--gold-soft);
+    color: var(--gold-deep);
+    display: grid; place-items: center;
+    margin-bottom: var(--space-3);
+  }
+  .feature-icon svg { width: 20px; height: 20px; stroke-width: 1.8; }
+
+  /* ---------- Badges ---------- */
+  .badge {
+    display: inline-flex; align-items: center;
+    gap: 6px;
+    font-size: 0.78rem; font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .badge-success { background: var(--green-soft); color: var(--green); border-color: rgba(31,122,77,0.2); }
+  .badge-warn    { background: var(--amber-soft); color: var(--amber); border-color: rgba(169,106,0,0.25); }
+  .badge-ink     { background: var(--ink); color: #fff; }
+  .badge-gold    { background: var(--gold-soft); color: var(--gold-deep); border-color: rgba(200,152,59,0.4); }
+
+  /* ---------- Pricing badges ---------- */
+  .pricing-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em;
+    padding: 5px 11px; border-radius: 999px; border: 1px solid transparent;
+    line-height: 1.2; white-space: nowrap;
+  }
+  .pricing-badge.tier-free    { background: #E8F3EC; border-color: #BFD8C8; color: #2F6B45; }
+  .pricing-badge.tier-upgrade { background: #FFF4D8; border-color: #D8B45C; color: #8B6914; }
+  .pricing-badge.tier-sub     { background: #0B1B33; border-color: #0B1B33; color: #FFFFFF; }
+
+  .pricing-legend {
+    background: #FFFFFF; border: 1px solid #E3D8C5;
+    border-radius: var(--radius); padding: var(--space-4);
+    margin-bottom: var(--space-5); box-shadow: var(--shadow-sm);
+  }
+  .pricing-legend-title {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: #5F6678; font-weight: 700; margin-bottom: var(--space-3);
+  }
+  .pricing-legend-grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .pricing-legend-grid { grid-template-columns: repeat(3,1fr); } }
+  .pricing-legend-item { display: flex; flex-direction: column; gap: 6px; }
+  .pricing-legend-item p { margin: 0; font-size: 0.85rem; color: #5F6678; line-height: 1.4; }
+
+  /* ---------- Task Finder ---------- */
+  /* Search input row */
+  .finder-search-wrap {
+    position: relative;
+    margin-bottom: var(--space-4);
+  }
+  .finder-search-wrap svg {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%);
+    width: 18px; height: 18px;
+    stroke: var(--muted); pointer-events: none;
+  }
+  .finder-search {
+    width: 100%;
+    height: 46px;
+    padding: 0 42px 0 42px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg-elev);
+    font: 400 0.97rem var(--font-body);
+    color: var(--ink);
+    -webkit-appearance: none;
+  }
+  .finder-search::placeholder { color: var(--muted); }
+  .finder-search:focus {
+    border-color: var(--gold);
+    outline: 3px solid rgba(200,152,59,0.25);
+    outline-offset: 0;
+  }
+  .finder-search-clear {
+    position: absolute; right: 10px; top: 50%;
+    transform: translateY(-50%);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    width: 28px; height: 28px;
+    display: none; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--muted);
+    font-size: 1rem; line-height: 1;
+  }
+  .finder-search-clear.visible { display: flex; }
+  .finder-search-clear:hover { background: var(--ink); color: #fff; }
+
+  .task-card {
+    text-align: left;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    display: flex; flex-direction: column; gap: 6px;
+    box-shadow: var(--shadow-sm);
+    transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+    font: inherit; color: inherit;
+    width: 100%;
+    min-height: 100px;
+  }
+  .task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: var(--gold);
+  }
+  .task-card .task-num  { font-family: var(--font-display); font-size: 0.78rem; color: var(--gold-deep); letter-spacing: 0.06em; }
+  .task-card .task-title { font-weight: 600; color: var(--ink); font-size: 1rem; }
+  .task-card .task-meta  { margin-top: auto; font-size: 0.8rem; color: var(--muted); }
+
+  /* Result panel — inline on desktop, slide-up drawer on mobile */
+  .result-panel {
+    margin-top: var(--space-5);
+    background: rgba(255,255,255,0.85);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    box-shadow: var(--shadow);
+    scroll-margin-top: calc(var(--header-h) + 12px);
+  }
+  .result-panel[hidden] { display: none; }
+
+  /* Mobile drawer overlay */
+  @media (max-width: 699px) {
+    .result-panel-backdrop {
+      display: none;
+      position: fixed; inset: 0; z-index: 150;
+      background: rgba(15,28,51,0.45);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+    .result-panel-backdrop.open { display: block; }
+    .result-panel {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 160;
+      margin: 0;
+      max-height: 88vh;
+      overflow-y: auto;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      border-bottom: none;
+      padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0));
+      transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.32,.72,0,1);
+      box-shadow: 0 -8px 32px rgba(15,28,51,0.18);
+    }
+    .result-panel.drawer-open {
+      transform: translateY(0);
+    }
+    /* Drag handle */
+    .result-panel::before {
+      content: "";
+      display: block;
+      width: 40px; height: 4px;
+      background: var(--line);
+      border-radius: 999px;
+      margin: 0 auto var(--space-4);
+    }
+  }
+  .result-panel-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+  }
+  .result-dismiss {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font: 500 0.82rem var(--font-body);
+    color: var(--muted);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    flex-shrink: 0;
+    min-height: 34px;
+  }
+  .result-dismiss:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .result-grid {
+    display: grid; gap: var(--space-3);
+    grid-template-columns: 1fr;
+    margin-bottom: var(--space-4);
+  }
+  @media (min-width: 700px) { .result-grid { grid-template-columns: 1fr 1fr; } }
+  .info-tile {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3) var(--space-4);
+  }
+  .info-tile .label {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); font-weight: 600; margin-bottom: 4px;
+  }
+  .info-tile .value { color: var(--ink); font-weight: 500; }
+
+  /* ---------- Category filter tabs ---------- */
+  .category-tabs {
+    display: flex; gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: var(--space-5);
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+  .category-tabs button {
+    flex-shrink: 0;
+    background: var(--bg-elev); border: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 8px 14px; border-radius: 999px;
+    font: 500 0.85rem var(--font-body);
+    cursor: pointer; white-space: nowrap; min-height: 36px;
+  }
+  .category-tabs button:hover { border-color: var(--gold); color: var(--ink); }
+  .category-tabs button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  /* ---------- Tools view — internal sub-tabs ---------- */
+  .subtabs {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: var(--space-5);
+  }
+  .subtabs button {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 9px 16px; border-radius: var(--radius-sm);
+    font: 500 0.92rem var(--font-body);
+    cursor: pointer; min-height: 40px;
+  }
+  .subtabs button:hover { border-color: var(--gold); color: var(--ink); }
+  .subtabs button[aria-selected="true"] {
+    background: var(--ink); color: #fff; border-color: var(--ink);
+  }
+  .subtab-panel { display: none; }
+  .subtab-panel.active { display: block; animation: fadeIn .2s ease; }
+
+  /* ---------- Automation examples chips ---------- */
+  .automation-examples {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  .automation-chips {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: var(--space-2);
+  }
+  .automation-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg-elev); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 12px;
+    font-size: 0.83rem; color: var(--ink-soft); font-weight: 500;
+  }
+  .automation-chip::before {
+    content: ""; width: 6px; height: 6px;
+    background: var(--gold); border-radius: 50%; flex-shrink: 0;
+  }
+
+  /* ---------- Tool cards ---------- */
+  .tool-card h3 {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .tool-name { flex: 1 1 auto; min-width: 0; word-break: break-word; }
+  .open-tool-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 600 0.78rem var(--font-body);
+    color: var(--gold-deep); background: var(--gold-soft);
+    border: 1px solid rgba(200,152,59,0.4);
+    padding: 6px 10px; border-radius: 999px;
+    text-decoration: none; white-space: nowrap;
+    min-height: 32px;
+    transition: background .15s ease, color .15s ease;
+    flex-shrink: 0;
+  }
+  .open-tool-link:hover,.open-tool-link:focus-visible {
+    background: var(--gold); color: #1a1408; border-color: var(--gold-deep);
+  }
+  .open-tool-link svg { width: 12px; height: 12px; stroke-width: 2.2; }
+  .tool-logo {
+    width: 36px; height: 36px; border-radius: 9px;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 700;
+    color: #fff; font-size: 14px; letter-spacing: -0.02em; flex-shrink: 0;
+  }
+  .tool-row {
+    display: grid; grid-template-columns: max-content 1fr;
+    gap: 6px var(--space-3); font-size: 0.92rem; margin-top: var(--space-2);
+  }
+  .tool-row dt { font-weight: 600; color: var(--ink-soft); }
+  .tool-row dd { margin: 0; color: var(--ink-soft); }
+  .tool-footer {
+    margin-top: var(--space-3); padding-top: var(--space-3);
+    border-top: 1px dashed var(--line);
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .tool-note {
+    margin-top: var(--space-3); padding: 10px 12px;
+    background: var(--gold-soft); border-left: 3px solid var(--gold);
+    border-radius: 8px; font-size: 0.85rem; color: var(--ink-soft); line-height: 1.5;
+  }
+  .tool-note strong { color: var(--gold-deep); }
+
+  /* ---------- AI Power Rankings ---------- */
+  .rankings-intro {
+    background: linear-gradient(135deg,var(--ink) 0%,#1a2a4a 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5) var(--space-5);
+    margin-bottom: var(--space-6);
+    position: relative; overflow: hidden;
+  }
+  .rankings-intro::after {
+    content: "";
+    position: absolute; right: -40px; top: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle,rgba(200,152,59,0.3),transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .rankings-intro h2 { color: #fff; margin-bottom: var(--space-2); }
+  .rankings-intro p { color: rgba(255,255,255,0.75); margin: 0; max-width: 58ch; }
+  /* Rank tier legend */
+  .rank-legend {
+    display: flex; flex-wrap: wrap; gap: var(--space-3);
+    margin-bottom: var(--space-6);
+  }
+  .rank-legend-item {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3) var(--space-4);
+    font-size: 0.9rem;
+  }
+  .rank-legend-item p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+  /* Rank tier badges */
+  .rank-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em;
+    padding: 4px 10px; border-radius: 999px; border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .rank-badge.great    { background: var(--rank-great-bg);    color: var(--rank-great);    border-color: var(--rank-great-border); }
+  .rank-badge.good     { background: var(--rank-good-bg);     color: var(--rank-good);     border-color: var(--rank-good-border); }
+  .rank-badge.learning { background: var(--rank-learning-bg); color: var(--rank-learning); border-color: var(--rank-learning-border); }
+
+  /* Rankings category card */
+  .rank-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .15s ease, border-color .15s ease;
+  }
+  .rank-card:hover { box-shadow: var(--shadow); border-color: rgba(200,152,59,0.4); }
+  .rank-card-head {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    padding: var(--space-4);
+    display: flex; align-items: center; gap: var(--space-3);
+  }
+  .rank-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--ink); color: var(--gold);
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .rank-icon svg { width: 20px; height: 20px; stroke-width: 1.8; }
+  .rank-card-head h3 { margin: 0; font-size: 1.05rem; }
+  .rank-card-head p  { margin: 0; font-size: 0.83rem; color: var(--muted); }
+  .rank-card-body { padding: var(--space-4); }
+  .rank-tier-group { margin-bottom: var(--space-3); }
+  .rank-tier-group:last-child { margin-bottom: 0; }
+  .rank-tier-label {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted); margin-bottom: var(--space-2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .rank-tools-row {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .rank-tool-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.83rem; font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+  }
+  .rank-tool-chip.great    { background: var(--rank-great-bg);    color: var(--rank-great);    border-color: var(--rank-great-border); }
+  .rank-tool-chip.good     { background: var(--rank-good-bg);     color: var(--rank-good);     border-color: var(--rank-good-border); }
+  .rank-tool-chip.learning { background: var(--rank-learning-bg); color: var(--rank-learning); border-color: var(--rank-learning-border); }
+  .rank-tool-chip .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .rank-tool-chip.great .dot    { background: var(--rank-great); }
+  .rank-tool-chip.good .dot     { background: var(--rank-good); }
+  .rank-tool-chip.learning .dot { background: var(--rank-learning); }
+
+  /* Rankings category filter chips */
+  .rank-filter-row {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: var(--space-5);
+  }
+  .rank-filter-row button {
+    background: var(--bg-elev); border: 1px solid var(--line);
+    color: var(--ink-soft); padding: 7px 14px;
+    border-radius: 999px; font: 500 0.85rem var(--font-body);
+    cursor: pointer; min-height: 36px;
+  }
+  .rank-filter-row button:hover { border-color: var(--gold); color: var(--ink); }
+  .rank-filter-row button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  /* ---------- Prompt blocks ---------- */
+  .prompt-block {
+    background: #fffdf6; border: 1px solid var(--line);
+    border-radius: var(--radius); padding: var(--space-4); margin-top: var(--space-3);
+  }
+  .prompt-block-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-3); margin-bottom: var(--space-2); flex-wrap: wrap;
+  }
+  .prompt-block label {
+    font-size: 0.78rem; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted); font-weight: 700;
+  }
+  .prompt-textarea {
+    width: 100%; min-height: 160px;
+    border: 1px solid var(--line); border-radius: var(--radius-sm);
+    background: #fff; padding: 14px;
+    font: 400 0.95rem var(--font-body); color: var(--ink);
+    line-height: 1.55; resize: vertical; -webkit-appearance: none;
+  }
+  .prompt-textarea:focus {
+    border-color: var(--gold);
+    outline: 3px solid rgba(200,152,59,0.25); outline-offset: 0;
+  }
+  .copy-row {
+    display: flex; align-items: center; gap: var(--space-3);
+    margin-top: var(--space-3); flex-wrap: wrap;
+  }
+  .copy-confirm {
+    font-size: 0.85rem; color: var(--green); font-weight: 600;
+    opacity: 0; transform: translateY(2px);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .copy-confirm.visible { opacity: 1; transform: translateY(0); }
+
+  /* ---------- Prompt Studio ---------- */
+  .rcto-card {
+    background: linear-gradient(135deg,#fff 0%,#fffaee 100%);
+    border: 1px solid var(--gold); border-radius: var(--radius-lg);
+    padding: var(--space-5); margin-bottom: var(--space-6);
+    position: relative; overflow: hidden;
+  }
+  .rcto-card::before {
+    content: ""; position: absolute; right: -40px; bottom: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle,rgba(200,152,59,0.18),transparent 70%);
+    border-radius: 50%;
+  }
+  .rcto-grid {
+    display: grid; gap: var(--space-3);
+    grid-template-columns: 1fr; margin-top: var(--space-4); position: relative;
+  }
+  @media (min-width: 600px) { .rcto-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (min-width: 880px) { .rcto-grid { grid-template-columns: repeat(4,1fr); } }
+  .rcto-grid--six { grid-template-columns: 1fr; }
+  @media (min-width: 600px) { .rcto-grid--six { grid-template-columns: repeat(2,1fr); } }
+  @media (min-width: 880px) { .rcto-grid--six { grid-template-columns: repeat(3,1fr); } }
+  .rcto-item { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: var(--space-3); }
+  .rcto-item .letter { font-family: var(--font-display); font-size: 1.6rem; color: var(--gold-deep); line-height: 1; margin-bottom: 6px; }
+  .rcto-item strong { color: var(--ink); display: block; margin-bottom: 2px; }
+  .rcto-item span { color: var(--muted); font-size: 0.9rem; }
+  .prompt-card { background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: var(--space-5); box-shadow: var(--shadow); }
+  .prompt-card-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
+  .prompt-card-head h3 { margin: 0; }
+  .prompt-help { color: var(--ink-soft); font-size: 0.92rem; margin: 0 0 var(--space-3); }
+  .prompt-tip { margin-top: var(--space-3); padding: var(--space-3); background: var(--gold-soft); border-left: 3px solid var(--gold); border-radius: 8px; font-size: 0.88rem; color: var(--ink-soft); }
+  .prompt-tip strong { color: var(--gold-deep); }
+
+  /* ---------- Free vs Paid ---------- */
+  .compare-block { border: 1px solid var(--glass-border); border-radius: var(--radius); padding: var(--space-5); background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); box-shadow: var(--shadow); }
+  .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: var(--card); border-radius: 8px; color: var(--ink-soft); font-size: 0.95rem; }
+  .checklist li::before { content: ""; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; margin-top: 9px; flex-shrink: 0; }
+  .check-icon { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; color: var(--green); }
+  .checklist.success li::before { display: none; }
+  .checklist.success li { background: var(--green-soft); color: #0f4d2c; }
+  .pay-table { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+  @media (min-width: 700px) { .pay-table { grid-template-columns: 1fr 1fr; } }
+  .pay-row { background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius); padding: var(--space-4); }
+  .pay-row h4 { margin: 0 0 6px; font: 600 1rem var(--font-body); color: var(--ink); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .pay-row p { margin: 0; font-size: 0.92rem; }
+
+  /* ---------- AI Business ---------- */
+  .biz-card { background: linear-gradient(180deg,rgba(255,255,255,0.78) 0%,rgba(254,250,239,0.72) 100%); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: var(--space-5); box-shadow: var(--shadow); }
+  .biz-card .num { width: 32px; height: 32px; border-radius: 8px; background: var(--ink); color: var(--gold); display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; margin-bottom: var(--space-3); font-size: 0.95rem; }
+
+  /* ---------- How-to onboarding ---------- */
+  .howto-card { background: linear-gradient(180deg,rgba(255,255,255,0.72) 0%,rgba(254,250,239,0.66) 100%); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-5); margin-bottom: var(--space-6); box-shadow: var(--shadow); }
+  .howto-intro { color: var(--ink-soft); font-size: 0.98rem; margin: 0 0 var(--space-4); max-width: 60ch; }
+  .howto-grid { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+  @media (min-width: 640px) { .howto-grid { grid-template-columns: repeat(2,1fr); } }
+  .howto-step { background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: var(--space-4); display: flex; gap: var(--space-3); align-items: flex-start; box-shadow: var(--shadow-sm); }
+  .howto-step .num { width: 32px; height: 32px; border-radius: 8px; background: var(--ink); color: var(--gold); display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; flex-shrink: 0; }
+  .howto-step h3 { font-size: 1rem; font-weight: 600; margin: 0 0 4px; line-height: 1.3; }
+  .howto-step p  { margin: 0; font-size: 0.9rem; color: var(--ink-soft); line-height: 1.5; }
+  .howto-tip { margin-top: var(--space-4); padding: var(--space-3) var(--space-4); background: var(--gold-soft); border-left: 3px solid var(--gold); border-radius: 8px; font-size: 0.9rem; color: var(--ink-soft); line-height: 1.55; }
+  .howto-tip strong { color: var(--gold-deep); }
+
+  /* ---------- AI Fluency: The 4D Framework ---------- */
+  .fluency-intro {
+    background: linear-gradient(135deg, var(--ink) 0%, #1a2a4a 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    margin-bottom: var(--space-6);
+    position: relative; overflow: hidden;
+  }
+  .fluency-intro::after {
+    content: "";
+    position: absolute; right: -40px; top: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(200,152,59,0.3), transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .fluency-intro h2 { color: #fff; margin-bottom: var(--space-2); }
+  .fluency-intro p  { color: rgba(255,255,255,0.75); margin: 0; max-width: 58ch; }
+  .fluency-grid {
+    display: grid; grid-template-columns: 1fr;
+    gap: var(--space-4); margin-bottom: var(--space-5);
+  }
+  @media (min-width: 560px) { .fluency-grid { grid-template-columns: 1fr 1fr; } }
+  .fluency-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-sm);
+    position: relative; overflow: hidden;
+    transition: transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .fluency-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: rgba(200,152,59,0.45);
+  }
+  .fluency-card::before {
+    content: "";
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+    border-radius: var(--radius) 0 0 var(--radius);
+  }
+  .fluency-card-head {
+    display: flex; align-items: center; gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+  .fluency-d {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--ink) 0%, #1a2a4a 100%);
+    color: var(--gold);
+    display: grid; place-items: center;
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 1.35rem;
+    letter-spacing: -0.02em; flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(200,152,59,0.3);
+  }
+  .fluency-card h3 { margin: 0; font-size: 1.15rem; color: var(--ink); }
+  .fluency-card p  { margin: 0; color: var(--ink-soft); font-size: 0.95rem; line-height: 1.6; }
+  .fluency-closing {
+    background: linear-gradient(135deg, #fffdf5 0%, var(--gold-soft) 100%);
+    border: 1px solid rgba(200,152,59,0.35);
+    border-radius: var(--radius);
+    padding: var(--space-5); text-align: center;
+    margin-top: var(--space-2);
+  }
+  .fluency-closing p {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+    color: var(--ink); font-style: italic; font-weight: 600; line-height: 1.4;
+  }
+
+  /* ---------- AI Guardrails ---------- */
+  .guardrails-head {
+    margin-top: var(--space-7);
+    margin-bottom: var(--space-5);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--line);
+  }
+  .guardrails-head h2 { font-size: clamp(1.3rem,3.5vw,1.75rem); margin-bottom: var(--space-2); }
+  .guardrails-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  @media (min-width: 560px) { .guardrails-grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 880px) { .guardrails-grid { grid-template-columns: repeat(3, 1fr); } }
+  .guardrail-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: var(--space-4) var(--space-5);
+    box-shadow: var(--shadow-sm);
+    display: flex; gap: var(--space-3); align-items: flex-start;
+  }
+  .guardrail-icon {
+    width: 40px; height: 40px; flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    display: grid; place-items: center;
+    color: var(--gold-deep);
+  }
+  .guardrail-icon svg { width: 18px; height: 18px; stroke-width: 1.9; }
+  .guardrail-card h3 { font-size: 0.97rem; font-weight: 700; margin: 0 0 4px; color: var(--ink); }
+  .guardrail-card p  { margin: 0; font-size: 0.88rem; color: var(--ink-soft); line-height: 1.55; }
+
+  /* ---------- Modal (Privacy Policy + Terms of Use) ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(15,28,51,0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--space-4);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+  .modal-box {
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    max-width: 560px; width: 100%;
+    max-height: 80vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(16px);
+    transition: transform .22s ease;
+    position: relative;
+  }
+  .modal-backdrop.open .modal-box { transform: translateY(0); }
+  .modal-close {
+    position: absolute; top: var(--space-4); right: var(--space-4);
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 8px; width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--muted); font-size: 1.1rem; line-height: 1;
+  }
+  .modal-close:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .modal-box h2 { font-size: 1.35rem; margin-bottom: var(--space-3); padding-right: var(--space-6); }
+  .modal-box p  { font-size: 0.93rem; color: var(--ink-soft); line-height: 1.65; margin-bottom: var(--space-3); }
+  .modal-box p:last-child { margin-bottom: 0; }
+  .modal-eyebrow {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--gold-deep); font-weight: 600; margin-bottom: var(--space-3);
+    display: block;
+  }
+
+  /* ---------- AI Study Tip ---------- */
+  .study-tip {
+    margin-top: var(--space-6);
+    background: linear-gradient(135deg, var(--ink) 0%, #1a2a4a 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    position: relative; overflow: hidden;
+  }
+  .study-tip::after {
+    content: "";
+    position: absolute; right: -40px; top: -40px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(200,152,59,0.28), transparent 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .study-tip-eyebrow {
+    font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 0.12em; font-weight: 700;
+    color: rgba(200,152,59,0.9); margin-bottom: var(--space-2);
+    display: block;
+  }
+  .study-tip h3 {
+    color: #fff; margin-bottom: var(--space-4);
+    font-size: clamp(1.1rem, 3vw, 1.35rem);
+  }
+  .study-tip-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    position: relative;
+  }
+  @media (min-width: 600px) { .study-tip-grid { grid-template-columns: 1fr 1fr; } }
+  .study-tip-col h4 {
+    font-family: var(--font-body);
+    font-size: 0.78rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin: 0 0 var(--space-2);
+  }
+  .study-tip-col.dont h4 { color: #f87171; }
+  .study-tip-col.do   h4 { color: #6ee7b7; }
+  .study-tip-col ul {
+    list-style: none; padding: 0; margin: 0;
+    display: grid; gap: 8px;
+  }
+  .study-tip-col li {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 0.9rem; line-height: 1.45;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.07);
+    border-radius: 8px; padding: 9px 12px;
+  }
+  .study-tip-col li .tip-icon {
+    font-size: 1rem; flex-shrink: 0; margin-top: 1px;
+  }
+  .study-tip-footer {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid rgba(255,255,255,0.12);
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.65);
+    font-style: italic;
+    position: relative;
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    margin-top: var(--space-7);
+    border-top: 2px solid var(--line);
+    background: var(--bg-elev);
+    padding: var(--space-6) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom, 0));
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .footer-inner { max-width: var(--maxw); margin: 0 auto; }
+  .footer-brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: var(--space-4);
+  }
+  .footer-brand .brand-mark { width: 28px; height: 28px; font-size: 12px; border-radius: 7px; flex-shrink: 0; }
+  .footer-brand-text strong {
+    display: block; font-family: var(--font-display);
+    font-size: 0.95rem; color: var(--ink); font-weight: 600;
+  }
+  .footer-brand-text span { font-size: 0.78rem; color: var(--muted); }
+  .footer-nav {
+    display: flex; flex-wrap: wrap; gap: 6px 14px;
+    margin-bottom: var(--space-5);
+    list-style: none; padding: 0; margin-top: 0;
+  }
+  .footer-nav li { margin: 0; }
+  .footer-nav a, .footer-nav button {
+    background: none; border: none; padding: 0;
+    font: 500 0.85rem var(--font-body);
+    color: var(--ink-soft); text-decoration: none;
+    cursor: pointer; transition: color .15s ease;
+  }
+  .footer-nav a:hover, .footer-nav button:hover { color: var(--gold-deep); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ---------- Footer legal section ---------- */
+  .footer-legal {
+    margin-bottom: var(--space-5);
+  }
+  .footer-legal-heading {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin: 0 0 var(--space-3);
+  }
+  .footer-legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .footer-legal-links li { margin: 0; }
+  /* Gold outline pill button */
+  .footer-legal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    border: 1.5px solid var(--gold);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font: 600 0.82rem var(--font-body);
+    color: var(--gold-deep);
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    min-height: 36px;
+    transition:
+      background   .15s ease,
+      color        .15s ease,
+      border-color .15s ease,
+      box-shadow   .15s ease,
+      transform    .12s ease;
+  }
+  .footer-legal-btn:hover {
+    background: var(--gold-soft);
+    border-color: var(--gold-deep);
+    color: var(--gold-deep);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(168,125,39,0.22);
+  }
+  .footer-legal-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+  .footer-legal-btn:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 3px;
+  }
+  .footer-legal-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .footer-divider {
+    border: none; border-top: 1px solid var(--line);
+    margin: var(--space-4) 0;
+  }
+  .footer-meta {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    align-items: center; justify-content: space-between;
+  }
+  .footer-meta p { margin: 0; font-size: 0.8rem; color: var(--muted); }
+  .footer-version {
+    font-size: 0.72rem; font-weight: 700;
+    background: var(--gold-soft); color: var(--gold-deep);
+    border: 1px solid rgba(200,152,59,0.4);
+    padding: 2px 8px; border-radius: 999px;
+    letter-spacing: 0.04em; white-space: nowrap;
+  }
+  @media (min-width: 880px) {
+    footer { padding-bottom: var(--space-6); }
+  }
+
+  /* ---------- Toast ---------- */
+  .toast {
+    position: fixed;
+    bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom,0));
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff;
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 0.9rem; font-weight: 500;
+    box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease; z-index: 200;
+  }
+  .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+  @media (min-width: 880px) { .toast { bottom: 24px; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<!-- ============== HEADER ============== -->
+<header class="site-header" role="banner">
+  <div class="header-inner">
+    <a href="#" class="brand" id="brandLink" aria-label="AI Task Navigator home">
+      <span class="brand-mark" aria-hidden="true">AI</span>
+      <span>
+        AI Task Navigator
+        <small>Smart guide in your pocket</small>
+      </span>
+      <span class="version-pill" aria-label="Version 2.0">v2.0</span>
+    </a>
+    <nav class="nav-desktop" aria-label="Primary">
+      <button data-nav="home"     aria-current="page">Home</button>
+      <button data-nav="finder">Tasks</button>
+      <button data-nav="tools">Tools</button>
+      <button data-nav="rankings">Rankings</button>
+      <button data-nav="fluency">AI Fluency</button>
+      <button data-nav="studio">Prompts</button>
+      <button data-nav="business">Business</button>
+      <button data-nav="freepaid">Pricing</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ============== MAIN ============== -->
+<main id="main" tabindex="-1">
+
+  <!-- ============ HOME ============ -->
+  <section class="view active" id="view-home" aria-labelledby="home-title">
+    <div class="hero">
+      <span class="section-eyebrow">Welcome to Version 2.0</span>
+      <h1 id="home-title">Find the Right AI Tool <span class="accent">for the Task</span></h1>
+      <p class="lead">Built for beginners, students, professionals, and business owners who are new to AI, overwhelmed by AI tools, or unsure which platform to use. This guide helps you choose the right tool, understand free vs paid options, and copy prompts that make AI easier to use.</p>
+      <div class="hero-actions">
+
+        <!-- Primary CTA -->
+        <button class="btn btn-gold" data-nav="finder" aria-label="Start with Task Finder">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          Start with Task Finder
+        </button>
+
+        <!-- Secondary CTA -->
+        <button class="btn btn-ink" data-nav="rankings" aria-label="See AI Power Rankings">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+          See AI Power Rankings
+        </button>
+
+        <!-- Tertiary CTA -->
+        <button class="btn btn-outline" data-nav="freepaid" aria-label="Compare Free vs Paid AI tools">
+          Compare Free vs Paid
+        </button>
+
+        <!-- Featured CTA -->
+        <button class="btn btn-studio" data-nav="studio" aria-label="Browse Prompt Studio — ready-to-use AI prompts">
+          <span class="btn-studio-main">🪄 Browse Prompt Studio <span class="arrow" aria-hidden="true">→</span></span>
+          <span class="btn-studio-sub">Ready-to-use AI prompts</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Creator byline -->
+    <p style="font-size:0.78rem;color:var(--muted);text-align:right;margin-top:calc(var(--space-3) * -1);margin-bottom:var(--space-5);font-style:italic;">Created by <strong style="font-style:normal;color:var(--ink-soft);">S. Jones</strong></p>
+
+    <section class="howto-card" aria-labelledby="howto-title">
+      <span class="section-eyebrow">Start Here</span>
+      <h2 id="howto-title" style="font-size:1.5rem;margin-top:4px;">How to Use This App</h2>
+      <p class="howto-intro">Start here if you are new to AI, unsure which tool to use, or trying to save money by choosing the right tool first.</p>
+      <div class="howto-grid">
+        <div class="howto-step">
+          <div class="num" aria-hidden="true">1</div>
+          <div>
+            <h3>Choose your task</h3>
+            <p>Pick what you need help with — writing, studying, research, business, design, or planning.</p>
+          </div>
+        </div>
+        <div class="howto-step">
+          <div class="num" aria-hidden="true">2</div>
+          <div>
+            <h3>Review the best tool</h3>
+            <p>The app shows which AI tool fits the task best. Tap <strong>Open tool</strong> to visit that AI tool's website.</p>
+          </div>
+        </div>
+        <div class="howto-step">
+          <div class="num" aria-hidden="true">3</div>
+          <div>
+            <h3>Copy and personalize the prompt</h3>
+            <p>Use the editable prompt box to copy a beginner-friendly prompt. Adjust the wording so it fits your situation.</p>
+          </div>
+        </div>
+        <div class="howto-step">
+          <div class="num" aria-hidden="true">4</div>
+          <div>
+            <h3>Start free first</h3>
+            <p>Try the free version when possible. Upgrade only if you need higher limits, advanced features, or stronger support.</p>
+          </div>
+        </div>
+      </div>
+      <p class="howto-tip"><strong>Tip:</strong> AI can guide, organize, and suggest ideas, but it should not replace your personal judgment, professional advice, or intuition. Always review the response and follow any school, workplace, or business standards that apply.</p>
+    </section>
+
+    <div class="section-head">
+      <span class="section-eyebrow">What this app does</span>
+      <h2>A smarter way to choose AI</h2>
+      <p class="section-lead">Built around three questions every user asks: which tool, free or paid, and what do I type into it?</p>
+    </div>
+
+    <div class="grid grid-2 grid-4">
+      <article class="card">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 7v6c0 5 4 9 8 9s8-4 8-9V7l-8-5z"/></svg>
+        </div>
+        <h3>Choose the Right Tool</h3>
+        <p>Find out whether to use ChatGPT, Claude, Gemini, NotebookLM, Perplexity, Copilot, or Canva.</p>
+      </article>
+      <article class="card">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </div>
+        <h3>Copy Better Prompts</h3>
+        <p>Use editable prompts created with a simple prompt engineering structure.</p>
+      </article>
+      <article class="card">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3>Save Money</h3>
+        <p>Learn when to use free AI tools and when it may be worth upgrading.</p>
+      </article>
+      <article class="card">
+        <div class="feature-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <h3>Build Smarter</h3>
+        <p>Use AI for school, business, finance, design, research, and app planning.</p>
+      </article>
+    </div>
+
+    <article class="card" style="margin-top:var(--space-5);">
+      <span class="badge badge-gold">Why this app exists</span>
+      <h3 style="margin-top:10px;font-size:1.25rem;">Make AI easier, practical, and less intimidating</h3>
+      <p style="margin-bottom:var(--space-3);">AI tools are changing fast, and it can be hard for beginners to know where to start. Many people are new to AI, unsure how to use large language models, or overwhelmed by new platforms. <strong><em>S. Jones</em></strong> created AI Task Navigator to help people navigate AI tools and large language models more easily, practically, and confidently.</p>
+      <p style="margin-bottom:0;">This app is especially useful for students, instructors, professionals, small business owners, and anyone who wants to use AI without wasting money on tools they do not need.</p>
+    </article>
+  </section>
+
+  <!-- ============ TASK FINDER ============ -->
+  <section class="view" id="view-finder" aria-labelledby="finder-title">
+    <div class="section-head">
+      <span class="section-eyebrow">Task Finder</span>
+      <h2 id="finder-title">What do you need AI to help you with today?</h2>
+      <p class="section-lead">Pick a task to see the recommended tool, a backup, and a prompt you can edit and copy.</p>
+    </div>
+
+    <!-- Quick search -->
+    <div class="finder-search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="finderSearch" class="finder-search" placeholder="Search tasks…" aria-label="Search tasks" autocomplete="off" />
+      <button class="finder-search-clear" id="finderSearchClear" aria-label="Clear search" type="button">×</button>
+    </div>
+
+    <div id="taskFilters" class="category-tabs" role="tablist" aria-label="Task category filters"></div>
+    <div id="taskGrid" class="grid grid-2 grid-3" role="list"></div>
+    <p id="taskEmpty" hidden style="text-align:center;padding:var(--space-5);background:var(--bg-elev);border:1px dashed var(--line);border-radius:var(--radius);">
+      <span style="display:block;font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:var(--space-2);">Can't find what you need?</span>
+      <span style="display:block;font-size:0.9rem;color:var(--muted);margin-bottom:var(--space-4);">Try a different search term or browse all tasks.</span>
+      <button type="button" class="btn btn-outline btn-sm" id="requestTaskBtn">Request a task →</button>
+    </p>
+    <div class="result-panel-backdrop" id="resultBackdrop" aria-hidden="true"></div>
+    <div id="resultPanel" class="result-panel" hidden aria-live="polite"></div>
+
+    <!-- AI Study Tip -->
+    <aside class="study-tip" aria-labelledby="study-tip-title">
+      <span class="study-tip-eyebrow">🎓 AI Study Tip</span>
+      <h3 id="study-tip-title">Ask AI to teach you — not just answer you</h3>
+
+      <div class="study-tip-grid">
+        <div class="study-tip-col dont">
+          <h4>❌ Don't ask</h4>
+          <ul>
+            <li><span class="tip-icon">❌</span> What's the answer?</li>
+          </ul>
+        </div>
+        <div class="study-tip-col do">
+          <h4>✅ Ask instead</h4>
+          <ul>
+            <li><span class="tip-icon">✅</span> Teach me how to solve this.</li>
+            <li><span class="tip-icon">✅</span> Explain the steps.</li>
+            <li><span class="tip-icon">✅</span> Create a practice quiz.</li>
+            <li><span class="tip-icon">✅</span> Give me another example.</li>
+            <li><span class="tip-icon">✅</span> Act like my tutor.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="study-tip-footer">Learning the process is more valuable than getting the answer.</p>
+    </aside>
+
+  </section>
+
+  <!-- ============ TOOLS (merged: Core + Builders + Academic + Automation) ============ -->
+  <section class="view" id="view-tools" aria-labelledby="tools-title">
+    <div class="section-head">
+      <span class="section-eyebrow">AI Tools Reference</span>
+      <h2 id="tools-title">Every AI tool you need, in one place</h2>
+      <p class="section-lead">Browse core assistants, specialized builders, automation platforms, and academic writing tools. Tap <strong>Open tool</strong> on any card to visit that tool's website.</p>
+    </div>
+
+    <div class="subtabs" role="tablist" aria-label="Tool categories">
+      <button role="tab" data-subtab="core"       aria-selected="true"  id="stab-core">Core Assistants</button>
+      <button role="tab" data-subtab="builders"   aria-selected="false" id="stab-builders">Builders &amp; Creative</button>
+      <button role="tab" data-subtab="automation" aria-selected="false" id="stab-automation">Automation Tools</button>
+      <button role="tab" data-subtab="academic"   aria-selected="false" id="stab-academic">Writing &amp; Citation</button>
+    </div>
+
+    <div id="subtab-core" class="subtab-panel active" role="tabpanel" aria-labelledby="stab-core">
+      <p class="section-lead" style="margin-bottom:var(--space-5);font-size:0.92rem;">Seven everyday AI assistants compared — what each is best at, when to use it, and whether to pay.</p>
+      <div id="toolsGrid" class="grid grid-2 grid-3"></div>
+    </div>
+
+    <div id="subtab-builders" class="subtab-panel" role="tabpanel" aria-labelledby="stab-builders">
+      <p class="section-lead" style="margin-bottom:var(--space-5);font-size:0.92rem;">Specialized tools for app prototyping, no-code building, premium image generation, project organization, and step-by-step learning.</p>
+      <div id="buildersGrid" class="grid grid-2 grid-3"></div>
+    </div>
+
+    <div id="subtab-automation" class="subtab-panel" role="tabpanel" aria-labelledby="stab-automation">
+
+      <!-- Automation concept card — teaches the AI planner vs automation runner distinction -->
+      <div class="rcto-card" style="margin-bottom:var(--space-5);">
+        <span class="badge badge-gold">Key concept</span>
+        <h3 style="margin-top:10px;">AI Assistants plan. Automation platforms run.</h3>
+        <p style="margin:0 0 var(--space-3);">These are two different types of tools that work best together. Understanding the difference helps you build smarter, faster workflows.</p>
+
+        <div style="display:grid;gap:var(--space-3);grid-template-columns:1fr;margin-bottom:var(--space-4);position:relative;">
+          <!-- Row 1: AI Assistants -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);padding:var(--space-4);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:var(--space-2);">
+              <span style="background:var(--ink);color:var(--gold);border-radius:8px;padding:4px 10px;font:700 0.78rem var(--font-body);letter-spacing:0.04em;white-space:nowrap;">AI Assistant</span>
+              <span style="font-weight:600;color:var(--ink);font-size:0.95rem;">Claude · ChatGPT · Gemini</span>
+            </div>
+            <p style="margin:0;font-size:0.9rem;color:var(--ink-soft);line-height:1.55;"><strong style="color:var(--ink);">Plans the automation.</strong> Describe your goal and Claude will map out the workflow — which apps to connect, what triggers to use, what actions to set, and what data to pass between steps. Use Claude before you open Zapier.</p>
+          </div>
+          <!-- Row 2: Automation Platforms -->
+          <div style="background:#fff;border:1px solid var(--line);border-radius:var(--radius-sm);padding:var(--space-4);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:var(--space-2);">
+              <span style="background:var(--gold);color:#1a1408;border-radius:8px;padding:4px 10px;font:700 0.78rem var(--font-body);letter-spacing:0.04em;white-space:nowrap;">Automation Platform</span>
+              <span style="font-weight:600;color:var(--ink);font-size:0.95rem;">Zapier · Make · n8n</span>
+            </div>
+            <p style="margin:0;font-size:0.9rem;color:var(--ink-soft);line-height:1.55;"><strong style="color:var(--ink);">Runs the automation.</strong> These platforms connect your apps and execute the workflow automatically — no manual steps required. They respond to triggers, move data, and take action around the clock.</p>
+          </div>
+        </div>
+
+        <!-- How they work together -->
+        <div style="background:var(--gold-soft);border-left:3px solid var(--gold);border-radius:8px;padding:var(--space-3) var(--space-4);position:relative;">
+          <p style="margin:0 0 6px;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold-deep);">Example workflow</p>
+          <p style="margin:0;font-size:0.9rem;color:var(--ink-soft);line-height:1.6;">Ask Claude: <em>"I want to automatically send a follow-up email when someone fills out my contact form and add them to a Google Sheet."</em> Claude designs the workflow and gives you step-by-step Zapier setup instructions. Then you build it in Zapier and it runs automatically from that point on.</p>
+        </div>
+      </div>
+
+      <p class="section-lead" style="margin-bottom:var(--space-3);font-size:0.92rem;">No-code and low-code automation platforms that connect apps, trigger workflows, and eliminate repetitive tasks — no programming required.</p>
+      <div class="automation-examples">
+        <span class="section-eyebrow" style="margin-bottom:var(--space-2);display:block;">Common automation examples</span>
+        <div class="automation-chips" id="automationExamples"></div>
+      </div>
+      <div id="automationGrid" class="grid grid-2 grid-3" style="margin-top:var(--space-5);"></div>
+    </div>
+
+    <div id="subtab-academic" class="subtab-panel" role="tabpanel" aria-labelledby="stab-academic">
+      <p class="section-lead" style="margin-bottom:var(--space-5);font-size:0.92rem;">Specialized tools for academic citation help, paraphrasing, grammar checks, and originality review. Always verify citations with your school's required format.</p>
+      <div id="academicGrid" class="grid grid-2 grid-3"></div>
+    </div>
+  </section>
+
+  <!-- ============ AI POWER RANKINGS ============ -->
+  <section class="view" id="view-rankings" aria-labelledby="rank-title">
+
+    <div class="rankings-intro">
+      <span class="section-eyebrow" style="color:rgba(200,152,59,0.9);">New in Version 2.0</span>
+      <h2 id="rank-title">AI Power Rankings</h2>
+      <p>See which AI tools lead in each skill category — from coding and research to image generation and sales. Rankings use three tiers: Great, Good, and Learning.</p>
+    </div>
+
+    <div class="rank-legend" aria-label="Ranking tier legend">
+      <div class="rank-legend-item">
+        <span class="rank-badge great">Great</span>
+        <p>Top performer in this category. Use this tool first.</p>
+      </div>
+      <div class="rank-legend-item">
+        <span class="rank-badge good">Good</span>
+        <p>Solid option — works well, especially as a backup.</p>
+      </div>
+      <div class="rank-legend-item">
+        <span class="rank-badge learning">Learning</span>
+        <p>Useful for specific angles, but not the primary choice.</p>
+      </div>
+    </div>
+
+    <div id="rankFilters" class="rank-filter-row" role="group" aria-label="Rankings category filter"></div>
+    <div id="rankingsGrid" class="grid grid-2 grid-3"></div>
+  </section>
+
+  <!-- ============ AI FLUENCY: THE 4D FRAMEWORK ============ -->
+  <section class="view" id="view-fluency" aria-labelledby="fluency-title">
+
+    <div class="fluency-intro">
+      <span class="section-eyebrow" style="color:rgba(200,152,59,0.9);">AI Fluency</span>
+      <h2 id="fluency-title">The 4D Framework</h2>
+      <p>AI Fluency develops through intentional practice of four core competencies.</p>
+    </div>
+
+    <div class="fluency-grid">
+
+      <article class="fluency-card">
+        <div class="fluency-card-head">
+          <div class="fluency-d" aria-hidden="true">D</div>
+          <h3>Delegation</h3>
+        </div>
+        <p>Our expertise and judgment remain the foundation of effective AI collaboration.</p>
+      </article>
+
+      <article class="fluency-card">
+        <div class="fluency-card-head">
+          <div class="fluency-d" aria-hidden="true">D</div>
+          <h3>Description</h3>
+        </div>
+        <p>Clear communication bridges our intentions and AI capabilities.</p>
+      </article>
+
+      <article class="fluency-card">
+        <div class="fluency-card-head">
+          <div class="fluency-d" aria-hidden="true">D</div>
+          <h3>Discernment</h3>
+        </div>
+        <p>Thoughtful and critical evaluation of outputs helps us work within AI limitations.</p>
+      </article>
+
+      <article class="fluency-card">
+        <div class="fluency-card-head">
+          <div class="fluency-d" aria-hidden="true">D</div>
+          <h3>Diligence</h3>
+        </div>
+        <p>Accountability, transparency, and responsibility ensure effective AI use.</p>
+      </article>
+
+    </div>
+
+    <div class="fluency-closing">
+      <p>The most powerful outcomes emerge when humans and AI build on each other's strengths.</p>
+    </div>
+
+    <!-- AI Guardrails — lives inside Fluency view, no separate nav item -->
+    <div class="guardrails-head">
+      <span class="section-eyebrow">AI Guardrails</span>
+      <h2>Five principles for responsible AI use</h2>
+      <p class="section-lead">These guardrails support the 4D Framework. Apply them every time you use AI for school, work, or business.</p>
+    </div>
+
+    <div class="guardrails-grid">
+
+      <div class="guardrail-card">
+        <div class="guardrail-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 2 4 7v6c0 5 4 9 8 9s8-4 8-9V7l-8-5z"/></svg>
+        </div>
+        <div>
+          <h3>Verify Before You Trust</h3>
+          <p>AI can make mistakes. Always verify important information.</p>
+        </div>
+      </div>
+
+      <div class="guardrail-card">
+        <div class="guardrail-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div>
+          <h3>Protect Sensitive Information</h3>
+          <p>Do not enter passwords, Social Security numbers, banking information, or confidential data into AI tools.</p>
+        </div>
+      </div>
+
+      <div class="guardrail-card">
+        <div class="guardrail-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <h3>Human Judgment Comes First</h3>
+          <p>AI assists decision-making and should not replace professional judgment.</p>
+        </div>
+      </div>
+
+      <div class="guardrail-card">
+        <div class="guardrail-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <h3>Use AI Responsibly</h3>
+          <p>Respect privacy, ethics, workplace policies, and copyright.</p>
+        </div>
+      </div>
+
+      <div class="guardrail-card">
+        <div class="guardrail-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+        <div>
+          <h3>Check Sources</h3>
+          <p>Review citations and original references whenever possible.</p>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ============ PROMPT STUDIO ============ -->
+  <section class="view" id="view-studio" aria-labelledby="studio-title">
+    <div class="section-head">
+      <span class="section-eyebrow">Prompt Studio</span>
+      <h2 id="studio-title">Choose, edit, copy, paste</h2>
+      <p class="section-lead">Choose a prompt, edit the details, copy it, and paste it into the recommended AI tool.</p>
+    </div>
+
+    <div class="rcto-card">
+      <span class="badge badge-gold">Mini lesson</span>
+      <h3 style="margin-top:10px;">The R-C-T-O Prompt Method</h3>
+      <p style="margin:0;">A simple structure that makes any AI prompt work better.</p>
+      <div class="rcto-grid">
+        <div class="rcto-item"><div class="letter">R</div><strong>Role</strong><span>Tell AI who to act as.</span></div>
+        <div class="rcto-item"><div class="letter">C</div><strong>Context</strong><span>Explain your situation.</span></div>
+        <div class="rcto-item"><div class="letter">T</div><strong>Task</strong><span>Tell AI what to do.</span></div>
+        <div class="rcto-item"><div class="letter">O</div><strong>Output</strong><span>Tell AI how to format the answer.</span></div>
+      </div>
+    </div>
+
+    <div class="rcto-card">
+      <span class="badge badge-ink">Next-level lesson</span>
+      <h3 style="margin-top:10px;">The R-C-T-F-T-C Prompt Method</h3>
+      <p style="margin:0;">Once you're comfortable with R-C-T-O, add Format, Tone, and Constraints to get sharper, more usable answers.</p>
+      <div class="rcto-grid rcto-grid--six">
+        <div class="rcto-item"><div class="letter">R</div><strong>Role</strong><span>Act as a coach, teacher, reviewer, strategist, or assistant.</span></div>
+        <div class="rcto-item"><div class="letter">C</div><strong>Context</strong><span>Share the background, goal, audience, problem, or assignment.</span></div>
+        <div class="rcto-item"><div class="letter">T</div><strong>Task</strong><span>State clearly what you want the AI to do.</span></div>
+        <div class="rcto-item"><div class="letter">F</div><strong>Format</strong><span>Bullets, table, checklist, email, outline, paragraph, or script.</span></div>
+        <div class="rcto-item"><div class="letter">T</div><strong>Tone</strong><span>Professional, friendly, beginner-friendly, academic, or warm.</span></div>
+        <div class="rcto-item"><div class="letter">C</div><strong>Constraints</strong><span>Word count, reading level, no fluff, cite sources, APA/MLA, avoid jargon.</span></div>
+      </div>
+    </div>
+
+    <div class="category-tabs" id="categoryTabs" role="tablist" aria-label="Prompt categories"></div>
+    <div id="promptList" class="grid"></div>
+  </section>
+
+  <!-- ============ FREE VS PAID ============ -->
+  <section class="view" id="view-freepaid" aria-labelledby="fp-title">
+    <div class="section-head">
+      <span class="section-eyebrow">Free vs Paid</span>
+      <h2 id="fp-title">Start free first</h2>
+      <p class="section-lead">Upgrade only when the tool saves time, improves your work, or supports school, business, or professional tasks you use every week.</p>
+    </div>
+
+    <div class="pricing-legend" aria-label="Pricing tier legend">
+      <div class="pricing-legend-title">Pricing legend</div>
+      <div class="pricing-legend-grid">
+        <div class="pricing-legend-item">
+          <span class="pricing-badge tier-free">Free to Start</span>
+          <p>The free version is enough for most users. Try it before paying.</p>
+        </div>
+        <div class="pricing-legend-item">
+          <span class="pricing-badge tier-upgrade">Upgrade When Needed</span>
+          <p>Free works for basics; paid adds value if you use it weekly.</p>
+        </div>
+        <div class="pricing-legend-item">
+          <span class="pricing-badge tier-sub">Subscription Needed</span>
+          <p>Effectively paid-only or requires a subscription to use seriously.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-bottom:var(--space-5);">
+      <div class="compare-block">
+        <span class="pricing-badge tier-free">Free to Start</span>
+        <h3 style="margin-top:10px;">Best Free Starter Stack</h3>
+        <ul class="checklist success" id="freeStack"></ul>
+      </div>
+      <div class="compare-block">
+        <span class="pricing-badge tier-upgrade">Upgrade When Needed</span>
+        <h3 style="margin-top:10px;">Signs it might be time to pay</h3>
+        <ul class="checklist" id="upgradeList"></ul>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-eyebrow">Paid Tool Guidance</span>
+      <h2>Is it worth it for you?</h2>
+    </div>
+    <div class="pay-table" id="payGuidance"></div>
+
+    <div class="section-head" style="margin-top:var(--space-7);">
+      <span class="section-eyebrow">Writing, Citation &amp; Academic Tools</span>
+      <h2>Academic writing support</h2>
+      <p class="section-lead">Specialized free-vs-paid notes for students and academic writers. Always verify citations with your school's required format.</p>
+    </div>
+    <div class="pay-table" id="academicGuidance"></div>
+  </section>
+
+  <!-- ============ AI BUSINESS ============ -->
+  <section class="view" id="view-business" aria-labelledby="biz-title">
+    <div class="section-head">
+      <span class="section-eyebrow">AI Business Starter</span>
+      <h2 id="biz-title">Explore starting an AI-related business</h2>
+      <p class="section-lead">Six guided prompts for finding ideas, researching your market, and planning your first move.</p>
+    </div>
+    <div id="bizGrid" class="grid grid-2"></div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark" aria-hidden="true">AI</span>
+        <div class="footer-brand-text">
+          <strong>AI Task Navigator</strong>
+          <span>Smart guide in your pocket</span>
+        </div>
+      </div>
+
+      <section class="footer-legal" aria-labelledby="footer-legal-heading">
+        <p class="footer-legal-heading" id="footer-legal-heading">Legal Information</p>
+        <ul class="footer-legal-links">
+          <li>
+            <button type="button" class="footer-legal-btn" id="openPrivacy">
+              <span class="footer-legal-icon" aria-hidden="true">🔒</span>
+              Privacy Policy
+            </button>
+          </li>
+          <li>
+            <button type="button" class="footer-legal-btn" id="openTerms">
+              <span class="footer-legal-icon" aria-hidden="true">📋</span>
+              Terms of Use
+            </button>
+          </li>
+        </ul>
+      </section>
+
+      <hr class="footer-divider" />
+
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:var(--space-3);font-style:italic;line-height:1.55;">AI tools evolve rapidly. Recommendations within AI Task Navigator are reviewed periodically and may change as tools improve.</p>
+
+      <div class="footer-meta">
+        <p>Created by <strong><em>S. Jones</em></strong> · Free beginner-friendly AI guide · No login · No tracking</p>
+        <span class="footer-version">Version 2.0</span>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<!-- ============ PRIVACY POLICY MODAL ============ -->
+<div class="modal-backdrop" id="modalPrivacy" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
+  <div class="modal-box">
+    <button class="modal-close" data-close-modal="modalPrivacy" aria-label="Close Privacy Policy">×</button>
+    <span class="modal-eyebrow">Legal</span>
+    <h2 id="privacy-title">Privacy Policy</h2>
+    <p>AI Task Navigator does not collect, store, sell, or share personal information.</p>
+    <p>Users should review the privacy policies of any external AI tools they choose to use.</p>
+    <p style="font-size:0.82rem;color:var(--muted);">Last Updated: June 2026 · AI Task Navigator · Created by S. Jones</p>
+  </div>
+</div>
+
+<!-- ============ TERMS OF USE MODAL ============ -->
+<div class="modal-backdrop" id="modalTerms" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+  <div class="modal-box">
+    <button class="modal-close" data-close-modal="modalTerms" aria-label="Close Terms of Use">×</button>
+    <span class="modal-eyebrow">Legal</span>
+    <h2 id="terms-title">Terms of Use</h2>
+    <p>AI Task Navigator is provided for educational and informational purposes only and does not constitute legal, financial, tax, medical, grant, or professional advice.</p>
+    <p>Users are responsible for reviewing and validating AI-generated outputs before making decisions.</p>
+    <p style="font-size:0.82rem;color:var(--muted);">Last Updated: June 2026 · AI Task Navigator · Created by S. Jones</p>
+  </div>
+</div>
+
+<!-- ============ MOBILE TAB BAR ============ -->
+<nav class="tabbar" aria-label="Mobile primary">
+  <div class="tabbar-inner">
+    <button data-nav="home" aria-current="page" aria-label="Home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      <span>Home</span>
+    </button>
+    <button data-nav="finder" aria-label="Task Finder">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>Tasks</span>
+    </button>
+    <button data-nav="tools" aria-label="Core Tools">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 1 5 5L10 21l-7 1 1-7z"/></svg>
+      <span>Tools</span>
+    </button>
+    <button data-nav="rankings" aria-label="AI Power Rankings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+      <span>Rankings</span>
+    </button>
+    <button data-nav="fluency" aria-label="AI Fluency">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/><path d="M12 8v4l3 3"/></svg>
+      <span>Fluency</span>
+    </button>
+    <button data-nav="studio" aria-label="Prompt Studio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Prompts</span>
+    </button>
+    <button data-nav="business" aria-label="AI Business">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18M5 7v13a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>
+      <span>Business</span>
+    </button>
+    <button data-nav="freepaid" aria-label="Free vs Paid">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Pricing</span>
+    </button>
+  </div>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite">Copied!</div>
+
+<script>
+/* ============================================================
+   AI Task Navigator 2.0 — App Logic
+   Changes from 1.0:
+   - 4 Task Finder data updates (Grant, PowerPoint, Build App, Design Dashboard)
+   - New AI Power Rankings section with 8 categories
+   - Tools view merged (Core + Builders + Academic with sub-tabs)
+   - Task Finder quick search input with clear button
+   - Result panel dismiss button
+   - Navigation updated to 8 items
+   ============================================================ */
+
+/* ==================== DATA ==================== */
+
+const TASKS = [
+  {
+    id: "write-paper",
+    name: "Write a Paper",
+    short: "Outlines, drafts, and edits",
+    bestTool: "ChatGPT, Claude, or Gemini",
+    backup: "Perplexity for research, Grammarly for editing",
+    why: "ChatGPT, Claude, and Gemini can help with outlining, drafting, editing, brainstorming, and improving writing. QuillBot is useful for paraphrasing, grammar, and citation support. Always keep your own voice, review all changes, and follow academic integrity rules.",
+    fpTip: "Start free. Upgrade only if you write often or need stronger document support.",
+    prompt: `Act as an academic writing coach. Help me write a clear paper on [TOPIC]. Create an outline, thesis statement, main points, and a draft structure. Keep the writing human, organized, and appropriate for college-level work. Ask me questions if information is missing.`
+  },
+  {
+    id: "citations",
+    name: "Create Citations",
+    short: "APA, MLA, and source organization",
+    bestTool: "Citefast, QuillBot, Perplexity, or ChatGPT",
+    backup: "School library tools, Purdue OWL, or instructor-provided citation guides",
+    why: "Citefast and QuillBot can help generate APA, MLA, and other citation formats. Perplexity is useful for finding source information, and ChatGPT can help organize citation details, but always verify citations with your school's required format.",
+    fpTip: "Start with free citation tools first. Upgrade only if you need saved citation lists, plagiarism checking, or advanced writing support.",
+    prompt: `Act as a citation and academic writing assistant. Help me organize the sources below into [APA/MLA/Chicago] format. Identify any missing citation details I need to verify, explain how each source should appear in my reference list or works cited page, and remind me what I should double-check against my instructor's requirements.`
+  },
+  {
+    id: "study-pdf",
+    name: "Study From a PDF",
+    short: "Source-only studying",
+    bestTool: "NotebookLM",
+    backup: "Claude or ChatGPT if document upload is available",
+    why: "NotebookLM is best when you want AI to focus on your uploaded source materials only — not the general internet.",
+    fpTip: "Start with the free version first. Upgrade only if you need higher limits or more advanced source features.",
+    prompt: `Use only the uploaded source material. Create a study guide that includes the main ideas, key terms, simple explanations, possible test questions, and a short summary of what I need to remember most.`
+  },
+  {
+    id: "summarize-doc",
+    name: "Summarize a Document",
+    short: "Reports, transcripts, long PDFs",
+    bestTool: "Claude",
+    backup: "ChatGPT or NotebookLM",
+    why: "Claude is strong with long documents, reports, transcripts, and professional summaries.",
+    fpTip: "Free may work for shorter documents. Paid may be useful for long or frequent document work.",
+    prompt: `Act as a professional document analyst. Summarize the document below into key points, action items, important details, and a plain-language explanation. Do not add information that is not in the document.`
+  },
+  {
+    id: "research-topic",
+    name: "Research a Current Topic",
+    short: "Live info with sources",
+    bestTool: "Perplexity",
+    backup: "ChatGPT with browsing or Gemini",
+    why: "Perplexity is useful for current research, links, sources, and quick fact-finding.",
+    fpTip: "Start free for basic research. Upgrade only if research is a major part of your school, business, or professional work.",
+    prompt: `Act as a research assistant. Research the topic: [TOPIC]. Find current and reliable sources. Summarize the most important information, include links to sources, explain different viewpoints if needed, and end with 5 key takeaways.`
+  },
+  {
+    id: "flyer",
+    name: "Make a Flyer or Infographic",
+    short: "Posters, social posts, visuals",
+    bestTool: "Canva",
+    backup: "Gemini for design ideas, ChatGPT for wording",
+    why: "Canva is best for polished visual design, flyers, posters, social posts, and infographics.",
+    fpTip: "Canva free is good for basic designs. Canva Pro may be worth it if you create visuals often.",
+    prompt: `Act as a visual communication strategist. Turn the information below into a one-page flyer or infographic plan. Include a headline, section titles, short text blocks, recommended icons, chart ideas, color suggestions, and layout structure.`
+  },
+  {
+    id: "powerpoint",
+    name: "Create a PowerPoint",
+    short: "Slide decks and presentations",
+    bestTool: "Claude or Canva",
+    backup: "ChatGPT or Microsoft Copilot 365",
+    why: "Claude can structure slides, speaker notes, and presentation flow. Canva can create polished visuals, layouts, and presentation designs. ChatGPT is a solid backup for content, and Copilot is useful if you work inside Microsoft 365.",
+    fpTip: "Use free tools for simple decks. Upgrade only if you need advanced templates, brand kits, or Microsoft 365 integration.",
+    prompt: `Act as a presentation strategist. Turn the information below into a professional PowerPoint outline. Include slide titles, bullet points, visual suggestions, and speaker notes. Make the presentation clear, polished, and easy to explain to an audience.`
+  },
+  {
+    id: "excel",
+    name: "Build an Excel Sheet or Financial Summary",
+    short: "Spreadsheets, formulas, totals",
+    bestTool: "Claude",
+    backup: "ChatGPT or Microsoft 365 Copilot for Excel",
+    why: "Claude is especially strong for spreadsheet structure, dashboard design, data analysis, organizing data, financial summaries, financial tracking systems, formula creation, reporting, chart planning, and financial workflow design. ChatGPT is a helpful backup for spreadsheet analysis. Microsoft 365 Copilot is useful when working directly inside Excel.",
+    fpTip: "Start with Claude for spreadsheet planning, dashboards, financial tracking systems, formulas, summaries, and data organization. Use ChatGPT as a backup for spreadsheet analysis. Microsoft 365 Copilot may be worth it if you work heavily inside Excel and Microsoft 365.",
+    prompt: `Act as an Excel and financial organization expert. Help me create a professional spreadsheet or dashboard for [PURPOSE]. Include recommended tabs, column names, formulas, summary totals, data analysis ideas, dashboard layout, charts, tables, and financial tracking sections that would make the information easier to understand.`
+  },
+  {
+    id: "grant",
+    name: "Write a Grant Proposal",
+    short: "Need statements & narratives",
+    bestTool: "Claude or Gemini",
+    backup: "Perplexity for research",
+    why: "Claude is excellent for proposal structure, narratives, grant writing, needs statements, outcomes, and budget narratives. Gemini Deep Research can help locate supporting data, statistics, and source material.",
+    fpTip: "Paid may be worth it if you write long proposals or need heavy document support.",
+    prompt: `Act as a grant writing consultant. Help me draft a clear, human-sounding grant proposal using the information below. Organize it into need statement, project description, goals, outcomes, budget narrative, and evaluation plan. Ask me questions if information is missing.`
+  },
+  {
+    id: "biz-idea",
+    name: "Start an AI Business Idea",
+    short: "Brainstorm and validate",
+    bestTool: "ChatGPT or Claude",
+    backup: "Perplexity for local market research",
+    why: "ChatGPT and Claude are strong for business planning, idea generation, and service design.",
+    fpTip: "Start free while brainstorming. Upgrade only when you are actively building materials, proposals, or client deliverables.",
+    prompt: `Act as an AI business coach. Based on my skills in [SKILLS], my location [CITY/STATE], and my interests in [INTERESTS], give me 10 realistic AI business ideas I could start. For each idea, explain the target customer, problem solved, service offered, startup cost level, and first action step.`
+  },
+  {
+    id: "build-app",
+    name: "Build a Website or App",
+    short: "Code, layout, and prototypes",
+    bestTool: "Claude or Lovable",
+    backup: "ChatGPT or Gemini",
+    why: "Claude is strong for planning, architecture, coding, and development. Lovable can accelerate front-end creation and deployment. ChatGPT is a solid backup for planning, and Gemini can help with design polish.",
+    fpTip: "Start free for basic prototypes. Upgrade if you need longer coding sessions, complex app development, or more Lovable build credits.",
+    prompt: `Act as a senior front-end developer. Build a mobile-first responsive web app called [APP NAME]. The app should include [SECTIONS], use clean HTML, CSS, and JavaScript, and be ready to deploy on Netlify. Keep the design professional, accessible, and easy to use on phones and desktops.`
+  },
+  {
+    id: "decide-pay",
+    name: "Decide Whether to Pay for AI",
+    short: "Avoid unnecessary subscriptions",
+    bestTool: "AI Task Navigator guide",
+    backup: "ChatGPT for personalized comparison",
+    why: "Users need help avoiding unnecessary subscriptions. The Rankings and Pricing sections of this app are good starting points.",
+    fpTip: "Start free first. Upgrade only when the tool saves time, improves your work, or supports tasks you use every week.",
+    prompt: `Act as an AI subscription advisor. Help me decide which AI tools are worth paying for based on my needs: [NEEDS]. Compare free and paid options, explain which subscriptions overlap, and recommend what I should use first before spending money.`
+  },
+  {
+    id: "design-dashboard",
+    name: "Design a Mobile App Dashboard",
+    short: "App UI ideas and layouts",
+    bestTool: "Claude or Google Stitch",
+    backup: "Gemini or Canva",
+    why: "Claude can help define app structure, user flow, and requirements. Google Stitch is excellent for dashboard concepts and mobile UI design. Gemini and Canva are good for visual polish and color direction.",
+    fpTip: "Free is plenty for ideation and mockups. Paid only matters if you're iterating on UI work daily.",
+    prompt: `Act as a mobile app UI designer. Help me design a clean dashboard for an app called [APP NAME]. The app helps users [PURPOSE]. Suggest the main screens, card layout, navigation, color direction, and mobile-first user flow.`
+  },
+  {
+    id: "no-code-app",
+    name: "Build an App Without Coding",
+    short: "Prototypes with plain language",
+    bestTool: "Lovable or Base44",
+    backup: "Claude",
+    why: "Lovable and Base44 turn plain-language prompts into working app prototypes. Claude is the best backup for planning and detailed coding help.",
+    fpTip: "Lovable free is great for quick prototypes. Base44 free can feel limited — paid may be worth it for serious functional builds.",
+    prompt: `Act as an app-building strategist. Help me turn this idea into a no-code app plan for [LOVABLE/BASE44]. Define the user flow, main screens, database needs, features, and first build prompt.`
+  },
+  {
+    id: "premium-images",
+    name: "Create Premium AI Images",
+    short: "Concepts, mood boards, art direction",
+    bestTool: "Midjourney",
+    backup: "Canva or Gemini",
+    why: "Midjourney produces premium image quality and creative direction. Canva and Gemini are good backups for quick visuals or layout-ready images.",
+    fpTip: "Midjourney is paid-only — start with Canva or Gemini free if you're not sure you need premium output yet.",
+    prompt: `Act as an AI image prompt designer. Help me create a detailed image prompt for [IMAGE GOAL]. Include subject, style, lighting, mood, background, camera angle, color palette, and format.`
+  },
+  {
+    id: "organize-workspace",
+    name: "Organize My AI Project Workspace",
+    short: "Notion pages, tasks, deadlines",
+    bestTool: "Notion AI",
+    backup: "ChatGPT",
+    why: "Notion AI structures workspaces, tasks, and notes inside an organized hub. ChatGPT can help draft the structure first.",
+    fpTip: "Notion free covers a lot. Notion AI add-on is worth it if you're planning, writing, and tracking projects daily.",
+    prompt: `Act as a productivity systems designer. Help me organize a Notion workspace for [PROJECT NAME]. Include pages for planning, tasks, research, prompts, resources, meeting notes, deadlines, version history, and progress tracking.`
+  },
+  {
+    id: "learn-step-by-step",
+    name: "Learn a New Topic Step by Step",
+    short: "Guided learning with check-ins",
+    bestTool: "Google Learn About",
+    backup: "ChatGPT or NotebookLM",
+    why: "Google Learn About is built for guided, interactive understanding. ChatGPT or NotebookLM work well when you have your own materials to study from.",
+    fpTip: "Free is enough for most learners. Upgrade only if you study daily and need stronger tools.",
+    prompt: `Act as a learning coach. Help me understand [TOPIC] step by step. Explain it in simple language, give examples, ask me check-for-understanding questions, and create a short review guide at the end.`
+  },
+  {
+    id: "paraphrase-improve",
+    name: "Paraphrase and Improve My Writing",
+    short: "Reword, clarify, and check grammar",
+    bestTool: "QuillBot, ChatGPT, Claude, or Gemini",
+    backup: "Grammarly, Claude, or instructor writing center",
+    why: "ChatGPT, Claude, and Gemini can help with outlining, drafting, editing, brainstorming, and improving writing. QuillBot is useful for paraphrasing, grammar, and citation support.",
+    fpTip: "Start free for basic rewriting and grammar help. Upgrade only if you need higher limits, plagiarism checking, or advanced editing support.",
+    prompt: `Act as an academic writing coach. Help me improve the writing below while keeping my original meaning and voice. Make it clearer, more organized, and more professional. Do not add new facts. After revising, explain what changed and list anything I should cite or verify.`
+  },
+  {
+    id: "school-learning",
+    name: "📚 School & Learning",
+    short: "Studying, concepts, and exam prep",
+    bestTool: "NotebookLM or Gemini",
+    backup: "ChatGPT or GeoGebra (Math & Graphing)",
+    why: "NotebookLM is the strongest tool for studying from your own materials — upload class notes, PDFs, lecture slides, study guides, or YouTube videos and ask it to teach the material, create quizzes, summarize concepts, and explain difficult topics. Gemini is excellent for explaining concepts, walking through math and logic step by step, and providing educational support across subjects. Both tools are especially useful for Accounting, Statistics, Algebra, Finance, Economics, Business Courses, and Research Papers. ChatGPT is a strong backup for tutoring, concept explanations, and study planning. GeoGebra is a free specialized tool for graphing and visualizing math problems in algebra, statistics, and calculus.",
+    fpTip: "NotebookLM free is excellent for most students. Gemini free covers concept explanations and learning support well. Upgrade only if you need higher upload limits or more advanced features.",
+    prompt: `Act as a patient and knowledgeable tutor. I am studying [SUBJECT] and need help with [TOPIC OR CONCEPT].
+
+Please do the following:
+1. Explain the concept clearly in plain language
+2. Walk me through the steps or reasoning process
+3. Give me a concrete example I can relate to
+4. Create 3 practice questions so I can test my understanding
+5. Explain what to watch out for or common mistakes students make
+
+Do not just give me the answer. Help me understand how to think through the problem so I can solve similar ones on my own.`
+  },
+  {
+    id: "math-logic",
+    name: "Solve Math & Logic Problems",
+    short: "Algebra, stats, calculus, and logic",
+    bestTool: "Gemini or ChatGPT",
+    backup: "GeoGebra (free) for graphing and visualization",
+    why: "Gemini and ChatGPT are both strong for walking through math problems step by step — algebra, statistics, calculus, logic, and finance math. They can explain the reasoning, show each step, and help you understand why the answer works, not just what it is. GeoGebra is a free specialized tool for graphing functions, visualizing geometry, and exploring math interactively. For exam prep and studying from your own class materials, pair these with NotebookLM.",
+    fpTip: "Both Gemini and ChatGPT free are strong for math help. GeoGebra is completely free. Upgrade only if you need higher usage limits or more advanced problem types.",
+    prompt: `Act as a math tutor. Help me solve and understand this problem:
+
+[PASTE YOUR MATH PROBLEM HERE]
+
+Please:
+1. Identify what type of problem this is
+2. Walk through each step clearly
+3. Explain why each step is done
+4. Show the final answer with units if applicable
+5. Give me one similar practice problem to try
+
+Use plain language and show all work. Do not skip steps.`
+  }
+];
+
+/* Task filter chips */
+const TASK_FILTERS = [
+  { id: "all",      label: "All" },
+  { id: "school",   label: "School" },
+  { id: "math",     label: "Math & Logic" },
+  { id: "business", label: "Business" },
+  { id: "design",   label: "Design" },
+  { id: "research", label: "Research" },
+  { id: "finance",  label: "Finance" },
+  { id: "app",      label: "App Building" }
+];
+const TASK_CATEGORIES = {
+  school:   ["write-paper","citations","study-pdf","summarize-doc","research-topic","powerpoint","learn-step-by-step","paraphrase-improve","school-learning"],
+  math:     ["math-logic","school-learning","excel"],
+  business: ["summarize-doc","powerpoint","excel","grant","biz-idea","decide-pay","no-code-app","organize-workspace"],
+  design:   ["flyer","powerpoint","design-dashboard","premium-images"],
+  research: ["citations","summarize-doc","research-topic"],
+  finance:  ["excel","decide-pay"],
+  app:      ["build-app","design-dashboard","no-code-app"]
+};
+let activeTaskFilter = "all";
+let taskSearchQuery  = "";
+
+/* Core Tools */
+const TOOLS = [
+  { name:"ChatGPT",          initials:"GP", color:"#10a37f", url:"https://chatgpt.com/",
+    bestFor:"Brainstorming, writing, planning, tutoring, app strategy, prompt engineering, business ideas, resumes, emails, and step-by-step help.",
+    useWhen:"You need a flexible AI assistant that can help with many different tasks.",
+    notFor:"Source-only studying unless you upload the source or clearly provide the text.",
+    free:"Good for general help and basic writing.",
+    paid:"Helpful if you use AI often for school, work, business, coding, or documents.",
+    user:"Students, professionals, business owners, teachers, and new AI learners." },
+  { name:"Claude",            initials:"CL", color:"#c8743b", url:"https://claude.ai/",
+    bestFor:"Long documents, polished writing, coding, reports, proposals, financial explanations, and professional editing.",
+    useWhen:"You need clean writing, document structure, app-building help, or long-form analysis.",
+    notFor:"Designing the final visual layout by itself.",
+    free:"Useful for writing and planning, but usage may be limited.",
+    paid:"Worth considering if you work with long documents, code, or professional writing often.",
+    user:"Writers, professionals, app builders, students, grant writers, and business owners." },
+  { name:"Gemini",            initials:"GE", color:"#4285f4", url:"https://gemini.google.com/",
+    bestFor:"Google ecosystem tasks, voice features, brainstorming, visuals, image help, creative support, explaining concepts, walking through math and logic step by step, and educational support across subjects.",
+    useWhen:"You want general AI help connected to Google tools, or you need a concept explained, a math problem broken down, or educational support for coursework.",
+    notFor:"Strict source-based studying from your own uploaded class documents. NotebookLM is better for that.",
+    free:"Good for general AI use, brainstorming, and learning support.",
+    paid:"Useful for users who rely heavily on Google tools and need advanced AI features.",
+    user:"Google users, students, creatives, professionals, and anyone who wants concepts explained clearly.",
+    note:"Gemini can work with NotebookLM notebooks in supported accounts. However, NotebookLM should still be used separately when you want AI to answer only from your uploaded source materials." },
+  { name:"NotebookLM",        initials:"NL", color:"#1a73e8", url:"https://notebooklm.google/",
+    bestFor:"Studying from uploaded PDFs, class notes, lecture slides, research articles, YouTube videos, study guides, and transcripts. Ideal for creating quizzes, summaries, concept explanations, and exam preparation from your own materials.",
+    useWhen:"You want AI to teach, quiz, summarize, and explain based on your uploaded class materials only — not the general internet.",
+    notFor:"General brainstorming, creative tasks, or topics where you have not uploaded source materials.",
+    free:"Excellent free option for students at any level.",
+    paid:"Upgrade only if you need higher upload limits or more advanced features.",
+    user:"Students, teachers, researchers, and anyone studying from documents, lecture notes, or class materials." },
+  { name:"Perplexity",        initials:"PX", color:"#20808d", url:"https://www.perplexity.ai/",
+    bestFor:"Research, current information, sources, links, citations, and quick fact-finding.",
+    useWhen:"You need up-to-date information with source links.",
+    notFor:"Long creative writing or detailed app building.",
+    free:"Good for basic research and source discovery.",
+    paid:"Useful if you do frequent research, professional writing, or market analysis.",
+    user:"Students, researchers, professionals, business owners, and writers." },
+  { name:"Microsoft Copilot", initials:"MC", color:"#0078d4", url:"https://copilot.microsoft.com/",
+    bestFor:"Microsoft Word, Excel, PowerPoint, Outlook, Teams, Windows, and productivity tasks.",
+    useWhen:"You already work inside Microsoft 365 and want help with documents, spreadsheets, presentations, or email.",
+    notFor:"Users who do not use Microsoft apps often.",
+    free:"Good for general Microsoft-related help depending on access.",
+    paid:"Most useful for people who use Microsoft 365 heavily.",
+    user:"Professionals, office workers, students, accountants, administrators, and business owners." },
+  { name:"Canva",             initials:"CV", color:"#7d4cdb", url:"https://www.canva.com/",
+    bestFor:"Flyers, infographics, social media graphics, presentations, posters, resumes, and visual design.",
+    useWhen:"You need something polished and visual.",
+    notFor:"Deep writing, research, or complex spreadsheet formulas.",
+    free:"Good for basic designs and templates.",
+    paid:"Useful if you need premium templates, brand kits, resizing, and advanced design assets.",
+    user:"Business owners, students, content creators, teachers, nonprofits, and entrepreneurs." }
+];
+
+/* Builders & Creative */
+const BUILDERS = [
+  { name:"Google Stitch",      initials:"ST", color:"#1f6feb", url:"https://stitch.withgoogle.com/",
+    bestFor:"Mobile app UI ideas, dashboard layouts, web/mobile interface mockups, and design ideation.",
+    useWhen:"You're sketching screens, exploring layouts, or planning a new app interface.",
+    notFor:"Final pixel-perfect production design or full visual branding.",
+    free:"Generous for ideation.",
+    paid:"Optional. Most users get plenty of value from the free tier.",
+    user:"App planners, designers, founders, students, and prompt engineers." },
+  { name:"Lovable",            initials:"LV", color:"#ff5a8a", url:"https://lovable.dev/",
+    bestFor:"Fast app and website prototypes using plain-language AI prompts.",
+    useWhen:"You want to type what your app should do and get a working prototype quickly.",
+    notFor:"Complex backends or production-grade enterprise software.",
+    free:"Good for first prototypes and short build sessions.",
+    paid:"Worth it if you're iterating on ideas often or building real client demos.",
+    user:"Founders, side-hustlers, students, and product thinkers." },
+  { name:"Base44",             initials:"B4", color:"#0f9d58", url:"https://base44.com/",
+    bestFor:"No-code functional app building, internal tools, productivity apps, customer portals, and business app prototypes.",
+    useWhen:"You want a real working app — not just a mockup — without writing code.",
+    notFor:"Quick visual mockups (Stitch is faster) or premium image work.",
+    free:"Free access may feel limited for serious projects.",
+    paid:"Paid is usually a better fit if you're building a real internal tool, portal, or business app.",
+    user:"Operators, small business owners, ops teams, and no-code builders." },
+  { name:"Midjourney",         initials:"MJ", color:"#1a1a1a", url:"https://www.midjourney.com/",
+    bestFor:"Premium AI image generation, visual concepts, mood boards, campaign imagery, and creative art direction.",
+    useWhen:"You need high-quality, art-directed images for marketing, content, or concept work.",
+    notFor:"Quick free visuals — Canva or Gemini are better starting points.",
+    free:"No meaningful free tier — Midjourney is paid-only.",
+    paid:"Worth it if you create premium visuals weekly or run creative campaigns.",
+    user:"Designers, marketers, content creators, and creative directors." },
+  { name:"Notion AI",          initials:"NA", color:"#111111", url:"https://www.notion.com/",
+    bestFor:"AI workspace organization, project tracking, notes, task planning, content calendars, and portfolio documentation.",
+    useWhen:"You already live in Notion — or want one organized hub for your projects.",
+    notFor:"Standalone image generation or live web research.",
+    free:"Notion itself is free; the AI add-on has limits on the free plan.",
+    paid:"Worth it if you plan, write, and track projects in Notion every day.",
+    user:"Project managers, students, freelancers, and small teams." },
+  { name:"Google Learn About",  initials:"LA", color:"#4285f4", url:"https://learning.google.com/experiments/learn-about/signup",
+    bestFor:"Student learning support, interactive explanations, guided topic understanding, and step-by-step learning.",
+    useWhen:"You want to actually understand a topic — not just get an answer.",
+    notFor:"Heavy document analysis or source-only studying (NotebookLM is better).",
+    free:"Free and great for learners.",
+    paid:"Not needed for most users — the free experience is the experience.",
+    user:"Students, lifelong learners, teachers, and curious thinkers." }
+];
+
+/* Writing, Citation & Academic */
+const ACADEMIC_TOOLS = [
+  { name:"Citefast", initials:"CF", color:"#1f7a4d", url:"https://www.citefast.com/",
+    bestFor:"APA 7 citations, references, in-text citations, and title page support.",
+    useWhen:"You need quick citation help for college papers and want to organize references.",
+    notFor:"Replacing your school's citation rules or your instructor's requirements.",
+    free:"Useful free citation generator for basic academic citation support.",
+    paid:"Start free first; verify if any advanced features require an account.",
+    user:"College students, instructors, researchers, and academic writers." },
+  { name:"QuillBot",  initials:"QB", color:"#4f8a4a", url:"https://quillbot.com/",
+    bestFor:"Paraphrasing, grammar checking, summarizing, citation generation, and originality/plagiarism checking.",
+    useWhen:"You want to improve clarity, reword your own writing, check grammar, organize citations, or review originality.",
+    notFor:"Replacing your own thinking, writing an entire paper for you, or bypassing school academic integrity rules.",
+    free:"Useful for basic paraphrasing, grammar, summarizing, and citation support.",
+    paid:"Paid may be useful for higher limits, plagiarism checking, and more advanced writing support.",
+    user:"Students, writers, professionals, and anyone editing academic or professional work." }
+];
+
+/* ==================== AUTOMATION TOOLS DATA ==================== */
+
+const AUTOMATION_TOOLS = [
+  { name:"Zapier", initials:"ZP", color:"#ff4a00", url:"https://zapier.com/",
+    bestFor:"Connecting thousands of applications through no-code workflows using triggers and actions. Excellent for beginners, professionals, and small businesses.",
+    useWhen:"You want to automate repetitive tasks between apps without writing any code.",
+    notFor:"Complex multi-step logic requiring branching conditions or technical customization — Make or n8n are better suited.",
+    free:"Good free tier for simple two-step automations with limited monthly tasks.",
+    paid:"Worth it if you run multi-step workflows, need higher task volumes, or automate business-critical processes.",
+    user:"Small business owners, marketers, operations teams, professionals, and beginners." },
+  { name:"Make",   initials:"MK", color:"#6d00cc", url:"https://www.make.com/",
+    bestFor:"Visual workflow automation with more control, advanced logic, and complex multi-step automations.",
+    useWhen:"You need more powerful automation than Zapier offers, with visual scenario building and branching logic.",
+    notFor:"Complete beginners who want the simplest possible setup — start with Zapier first.",
+    free:"Generous free tier with 1,000 operations per month.",
+    paid:"Worth it for growing automation needs, higher volumes, and advanced workflow design.",
+    user:"Operations teams, marketers, developers, and professionals with moderate automation experience." },
+  { name:"n8n",    initials:"N8", color:"#ea4b71", url:"https://n8n.io/",
+    bestFor:"Powerful self-hosted or cloud automation platform for technical users, developers, and AI workflow automation.",
+    useWhen:"You need maximum flexibility, custom code nodes, self-hosting options, or AI-powered workflow automation.",
+    notFor:"Non-technical users looking for a simple drag-and-drop experience — Zapier or Make are better starting points.",
+    free:"Free self-hosted version available; cloud plan has a free tier.",
+    paid:"Worth it for developers and technical teams who need advanced automation with AI integration.",
+    user:"Developers, technical operators, IT teams, and advanced automation builders." }
+];
+
+const AUTOMATION_EXAMPLES = [
+  "Form submissions → Google Sheets",
+  "Lead follow-up emails",
+  "Gmail attachment processing",
+  "CRM contact updates",
+  "Task reminder notifications",
+  "AI workflow automation",
+  "Social media post scheduling",
+  "Invoice and billing triggers",
+  "Slack alerts from data changes",
+  "New order → fulfillment workflow"
+];
+
+/* ==================== AI POWER RANKINGS DATA ==================== */
+
+const RANKINGS = [
+  {
+    id: "coding",
+    label: "Coding",
+    icon: "code",
+    desc: "Writing, debugging, and building apps and scripts.",
+    great:    ["Claude","ChatGPT","Gemini"],
+    good:     ["Microsoft Copilot","Lovable"],
+    learning: ["Base44","Notion AI"]
+  },
+  {
+    id: "research",
+    label: "Research",
+    icon: "search",
+    desc: "Finding current information, sources, and facts.",
+    great:    ["Perplexity","NotebookLM"],
+    good:     ["ChatGPT","Gemini","Claude"],
+    learning: ["Canva"]
+  },
+  {
+    id: "automating",
+    label: "Automating",
+    icon: "zap",
+    desc: "Connecting apps, triggering workflows, and eliminating repetitive tasks.",
+    great:    ["Zapier"],
+    good:     ["Make"],
+    learning: ["n8n"]
+  },
+  {
+    id: "strategizing",
+    label: "Strategizing",
+    icon: "target",
+    desc: "Business strategy, planning, and decision-making.",
+    great:    ["ChatGPT","Claude"],
+    good:     ["Gemini","Perplexity"],
+    learning: ["Notion AI"]
+  },
+  {
+    id: "image-gen",
+    label: "Image Generation",
+    icon: "image",
+    desc: "Creating AI-generated visuals, art, and concept imagery.",
+    great:    ["Midjourney"],
+    good:     ["Canva","Gemini"],
+    learning: ["ChatGPT"]
+  },
+  {
+    id: "closing-sales",
+    label: "Closing Sales",
+    icon: "trending-up",
+    desc: "Writing proposals, follow-ups, and sales scripts.",
+    great:    ["ChatGPT","Claude"],
+    good:     ["Gemini","Perplexity"],
+    learning: ["Canva"]
+  },
+  {
+    id: "content",
+    label: "Creating Content",
+    icon: "edit",
+    desc: "Writing, editing, and designing content for any platform.",
+    great:    ["ChatGPT","Claude","Canva"],
+    good:     ["Gemini","Notion AI"],
+    learning: ["Midjourney"]
+  },
+  {
+    id: "skill-stacking",
+    label: "Skill Stacking",
+    icon: "layers",
+    desc: "Learning new skills and combining knowledge areas.",
+    great:    ["Google Learn About","NotebookLM"],
+    good:     ["ChatGPT","Claude"],
+    learning: ["Perplexity"]
+  }
+];
+
+/* Rankings filter options */
+const RANK_FILTERS = [
+  { id: "all",      label: "All Categories" },
+  { id: "coding",   label: "Coding" },
+  { id: "research", label: "Research" },
+  { id: "content",  label: "Content" },
+  { id: "business", label: "Business" }
+];
+const RANK_FILTER_MAP = {
+  coding:   ["coding"],
+  research: ["research"],
+  content:  ["content","skill-stacking"],
+  business: ["automating","strategizing","closing-sales"]
+};
+let activeRankFilter = "all";
+
+/* ==================== PROMPT STUDIO DATA ==================== */
+
+const EXTRA_PROMPTS = {
+  "biz-design-doc": {
+    title: "Business Design Document",
+    bestTool: "Claude or ChatGPT",
+    helps: "Turning a raw idea into a structured plan you can act on.",
+    prompt: `Act as a startup planning consultant. Help me create a business design document for my idea: [BUSINESS IDEA]. Include the problem, target audience, solution, features, services, pricing ideas, competitors, tools needed, risks, and a 30-day launch plan.`,
+    tip: "Replace [BUSINESS IDEA] with a clear one-sentence description before pasting."
+  },
+  "ai-service-menu": {
+    title: "AI Service Menu",
+    bestTool: "ChatGPT or Claude",
+    helps: "Creating a clear list of services you can offer to clients.",
+    prompt: `Act as an AI service business consultant. Help me create a simple service menu for an AI consulting business. Include beginner-friendly services, target customers, deliverables, pricing tier ideas, and plain-language explanations of each service.`,
+    tip: "Ask the AI to list at least three pricing tiers (starter, standard, premium)."
+  },
+  "local-networking": {
+    title: "Local Networking Plan",
+    bestTool: "ChatGPT or Perplexity",
+    helps: "Finding people, places, and events that help your business grow.",
+    prompt: `Act as a networking strategist. Help me create a local networking plan for building an AI service business in [CITY/STATE]. Identify who I should meet, where I should go, what events to attend, what conversation starters to use, and how to follow up professionally.`,
+    tip: "Use Perplexity for live event listings; use ChatGPT to plan how to follow up."
+  },
+  "monetize-existing": {
+    title: "Monetize What You Already Have",
+    bestTool: "ChatGPT or Claude",
+    helps: "Identify things you could monetize within the next 7 days using content, skills, knowledge, documents, templates, presentations, notes, videos, resources, or projects you already have.",
+    prompt: `Act as a business monetization strategist.
+
+I want to identify things I could monetize within the next 7 days using content, skills, knowledge, documents, templates, presentations, notes, videos, or resources I already have.
+
+Here is what I already have or know:
+
+[PASTE YOUR CONTENT, SKILLS, EXPERIENCE, NOTES, PROJECTS, OR IDEAS HERE]
+
+Please analyze this and give me:
+
+1. Quick monetization ideas I could test within 7 days
+2. Digital products I could create from what I already have
+3. Services I could offer based on my skills or experience
+4. Content I could repurpose into paid offers
+5. The easiest idea to launch first
+6. The audience most likely to pay for each idea
+7. A simple offer name for each idea
+8. A basic price range
+9. First 3 action steps to test the idea
+10. Any ideas with "Million Dollar Potential"
+
+Format the answer as a table with these columns:
+Idea | What I Already Have | Who Would Pay | 7-Day Path | Offer Name | Price Range | Difficulty | Million Dollar Potential | First Step`,
+    tip: "Paste at least 5–10 lines of context about your skills, projects, or content for the best results."
+  },
+  "citation-organizer": {
+    title: "Citation Organizer",
+    bestTool: "Citefast, QuillBot, ChatGPT, or Perplexity",
+    helps: "Helps users organize source information into APA, MLA, or Chicago citation format.",
+    prompt: `Act as a citation and academic writing assistant. Help me organize the sources below into [APA/MLA/Chicago] format. Identify any missing citation details I need to verify, explain how each source should appear in my reference list or works cited page, and remind me what I should double-check against my instructor's requirements.`,
+    tip: "Always verify the final citations against your instructor's required style guide."
+  },
+  "improve-writing": {
+    title: "Improve My Writing Without Changing My Meaning",
+    bestTool: "ChatGPT, Claude, Gemini, or QuillBot",
+    helps: "ChatGPT, Claude, and Gemini can help with outlining, drafting, editing, brainstorming, and improving writing. QuillBot is useful for paraphrasing, grammar, and citation support. Always keep your own voice and follow academic integrity rules.",
+    prompt: `Act as an academic writing coach. Help me improve the writing below while keeping my original meaning and voice. Make it clearer, more organized, and more professional. Do not add new facts. After revising, explain what changed and list anything I should cite or verify.`,
+    tip: "Keep your original voice — read the revision aloud and reject changes that don't sound like you."
+  },
+  "critical-thinking": {
+    title: "Research, Critical Thinking & Fact Verification",
+    bestTool: "Claude, ChatGPT, Gemini, NotebookLM, or Perplexity",
+    helps: "Use this prompt when you need to evaluate information before acting on it — not just find it. Best for students, professionals, grant managers, business owners, and researchers who want AI to reason carefully, separate facts from assumptions, and flag what is uncertain rather than just generate a confident-sounding answer.",
+    prompt: `Act as a research, critical thinking, and fact-verification assistant.
+When answering my question:
+
+1. Distinguish between verified facts, assumptions, and unknowns.
+2. Do not invent information, sources, statistics, quotes, or references.
+3. Clearly identify uncertainty when information cannot be verified.
+4. Explain your reasoning before providing a conclusion.
+5. Point out missing information that may affect the answer.
+6. Identify potential risks, limitations, or alternative viewpoints.
+7. Prioritize accuracy and transparency over speed.
+8. When available, provide supporting sources or references.
+
+Use the following format:
+
+Verified Facts: [List known facts]
+Assumptions: [List assumptions]
+Unknowns: [List missing or unverifiable information]
+Analysis: [Reasoning process]
+Conclusion: [Best answer based on available information]
+Confidence Level: High / Medium / Low
+
+My question: [PASTE YOUR QUESTION OR TOPIC HERE]`,
+    tip: "Best used with Claude, ChatGPT, Gemini, NotebookLM, or Perplexity. Works well for evaluating decisions, researching grants, verifying claims, analyzing complex topics, or any situation where you need AI to think carefully rather than just answer quickly."
+  }
+};
+
+const CAREER_PROMPT = {
+  id: "resume-career",
+  title: "Tailored Resume Refresh",
+  bestTool: "ChatGPT, Claude, or Gemini Gems",
+  helps: "ChatGPT and Claude are strong for rewriting resumes, matching job descriptions, improving bullet points, and making experience sound more polished and professional.",
+  prompt: `Act as a senior career coach and resume writer. Using my resume and the target job description below, rewrite my resume so it clearly matches the role. Keep the language human, professional, and accurate. Quantify achievements where possible, improve weak bullet points, and make sure the resume uses keywords from the job posting without sounding copied or robotic.
+
+Also suggest a short cover letter paragraph and 5 interview talking points based on the revised resume.`,
+  tip: "Paste the actual job posting and your current resume. The more specific the job description, the stronger the match."
+};
+
+const STUDIO_CATEGORIES = [
+  { id:"study",     label:"Student & Study",            prompts:["write-paper","study-pdf","summarize-doc","citations","learn-step-by-step","improve-writing","paraphrase-improve"] },
+  { id:"business",  label:"Business & Entrepreneurship", prompts:["biz-idea","decide-pay","biz-design-doc","monetize-existing","organize-workspace"] },
+  { id:"ai-biz",    label:"AI Business Starter",         prompts:["biz-idea","biz-design-doc","ai-service-menu","local-networking","monetize-existing"] },
+  { id:"excel",     label:"Excel & Financial",           prompts:["excel"] },
+  { id:"ppt",       label:"PowerPoint & Infographic",    prompts:["powerpoint","flyer"] },
+  { id:"research",  label:"Research & Citation",         prompts:["research-topic","citations","citation-organizer"] },
+  { id:"critical",  label:"Research & Critical Thinking", prompts:["critical-thinking","research-topic"] },
+  { id:"career",    label:"Resume & Career",             prompts:["resume-career"] },
+  { id:"grant",     label:"Grant Writing",               prompts:["grant"] },
+  { id:"build",     label:"Website / App Building",      prompts:["build-app","design-dashboard","no-code-app"] },
+  { id:"creative",  label:"Design & Creative",           prompts:["design-dashboard","premium-images","flyer"] }
+];
+
+/* AI Business Starter cards */
+const BIZ_CARDS = [
+  { title:"Find My AI Business Idea", desc:"Get 10 realistic AI business ideas matched to your skills, location, and interests.",
+    prompt:`Act as an AI business coach. Based on my skills in [SKILLS], my experience in [BACKGROUND], my location [CITY/STATE], and my interests in [INTERESTS], recommend 10 realistic AI business ideas I could start. Include the target customer, problem solved, service offered, startup cost level, and first step for each idea.` },
+  { title:"Research AI Opportunities in My City", desc:"Map local industries, events, and partners worth exploring first.",
+    prompt:`Act as a local market research strategist. Research AI-related business opportunities in [CITY/STATE]. Identify local industries, small business needs, networking events, chambers of commerce, startup groups, training programs, and partnership opportunities. Then recommend the top 5 opportunities I should explore first.` },
+  { title:"Create a Business Design Document", desc:"Turn your idea into a structured one-pager with a 30-day launch plan.",
+    prompt:`Act as a startup planning consultant. Help me create a business design document for my AI business idea: [BUSINESS IDEA]. Include the problem, target audience, solution, services, features, pricing ideas, competitors, tools needed, risks, and a 30-day launch plan.` },
+  { title:"Build an AI Service Menu", desc:"Design beginner-friendly services and pricing tiers you can offer right away.",
+    prompt:`Act as an AI service business consultant. Help me create a simple service menu for an AI consulting business. Include beginner-friendly services, target customers, deliverables, pricing tier ideas, and plain-language explanations of each service.` },
+  { title:"Create a Networking Plan", desc:"Find people, places, events, and follow-up scripts in your city.",
+    prompt:`Act as a networking strategist. Help me create a local networking plan for building an AI service business in [CITY/STATE]. Identify who I should meet, where I should go, what events to attend, what conversation starters to use, and how to follow up professionally.` },
+  { title:"Monetize What You Already Have", bestTool:"ChatGPT or Claude",
+    desc:"Identify things you could monetize within the next 7 days using content, skills, knowledge, documents, templates, presentations, notes, or projects you already have.",
+    prompt:`Act as a business monetization strategist.
+
+I want to identify things I could monetize within the next 7 days using content, skills, knowledge, documents, templates, presentations, notes, videos, or resources I already have.
+
+Here is what I already have or know:
+
+[PASTE YOUR CONTENT, SKILLS, EXPERIENCE, NOTES, PROJECTS, OR IDEAS HERE]
+
+Please analyze this and give me:
+1. Quick monetization ideas I could test within 7 days
+2. Digital products I could create from what I already have
+3. Services I could offer based on my skills or experience
+4. Content I could repurpose into paid offers
+5. The easiest idea to launch first
+6. The audience most likely to pay for each idea
+7. A simple offer name for each idea
+8. A basic price range
+9. First 3 action steps to test the idea
+10. Any ideas with "Million Dollar Potential"
+
+Format the answer as a table with these columns:
+Idea | What I Already Have | Who Would Pay | 7-Day Path | Offer Name | Price Range | Difficulty | Million Dollar Potential | First Step` }
+];
+
+/* Free vs Paid */
+const FREE_STACK = [
+  "ChatGPT free",
+  "Gemini free",
+  "NotebookLM free",
+  "Perplexity free",
+  "Canva free",
+  "Microsoft Copilot free if available through Windows or Microsoft access",
+  "Google Stitch free for design ideation",
+  "Lovable free for quick app prototypes",
+  "Notion free with limited Notion AI",
+  "Google Learn About — free for step-by-step learning",
+  "Citefast free for APA/MLA citation help",
+  "QuillBot free for paraphrasing, grammar, and citation support"
+];
+const UPGRADE_SIGNS = [
+  "You use the tool weekly",
+  "The free version limits your work",
+  "You need advanced models",
+  "You need more uploads",
+  "You need stronger design tools",
+  "You need better document or spreadsheet support",
+  "You are using it for school, work, or business"
+];
+const PAID_GUIDANCE = [
+  { name:"ChatGPT",           tier:"upgrade", text:"Worth considering for frequent writing, coding, research, tutoring, business planning, and project support." },
+  { name:"Claude",            tier:"upgrade", text:"Worth considering for long documents, coding, reports, proposals, and professional writing." },
+  { name:"Gemini",            tier:"upgrade", text:"Worth considering for Google-heavy users, voice features, advanced AI access, and creative workflows." },
+  { name:"NotebookLM",        tier:"free",    text:"Free is plenty for most learners. Upgrade only if you need higher limits or advanced source-based learning features." },
+  { name:"Perplexity",        tier:"upgrade", text:"Worth considering for heavy research, citations, current information, and source-based work." },
+  { name:"Microsoft Copilot", tier:"upgrade", text:"Worth considering if you live in Word, Excel, PowerPoint, Outlook, and Teams." },
+  { name:"Canva",             tier:"upgrade", text:"Worth considering for people who create frequent visuals, flyers, social posts, presentations, brand materials, or infographics." },
+  { name:"Google Stitch",     tier:"free",    text:"Free is usually plenty for design ideation. Paid is rarely required unless you're iterating on UI mockups daily." },
+  { name:"Lovable",           tier:"upgrade", text:"Worth considering if you build app prototypes regularly or need longer build sessions and more projects." },
+  { name:"Base44",            tier:"sub",     text:"Free access can feel limited. A paid subscription is usually the better fit for serious no-code app building, internal tools, and customer portals." },
+  { name:"Midjourney",        tier:"sub",     text:"Midjourney is subscription-only. Worth it if you create premium images, concept art, or campaign visuals weekly." },
+  { name:"Notion AI",         tier:"upgrade", text:"Worth it if you live in Notion and want AI help drafting notes, summarizing docs, and organizing projects daily." },
+  { name:"Google Learn About",tier:"free",    text:"Free is the experience. No need to pay — use it freely for guided, step-by-step learning." }
+];
+const ACADEMIC_GUIDANCE = [
+  { name:"Citefast", tier:"free",    text:"Start free for basic APA/MLA citation help and reference organization." },
+  { name:"QuillBot", tier:"upgrade", text:"Start free for basic paraphrasing, grammar, summarizing, and citation support. Consider paid only if you need higher limits, plagiarism/originality checking, or advanced writing tools." }
+];
+
+/* ==================== HELPERS ==================== */
+
+function esc(s) {
+  return String(s||"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function getStudioEntry(id) {
+  const t = TASKS.find(x => x.id === id);
+  if (t) return { id:t.id, title:t.name, bestTool:t.bestTool, helps:t.why, prompt:t.prompt, tip:t.fpTip };
+  if (id === "resume-career") return CAREER_PROMPT;
+  if (EXTRA_PROMPTS[id]) return { id, ...EXTRA_PROMPTS[id] };
+  return null;
+}
+
+function promptBlockHTML(id, prompt, label) {
+  label = label || "Editable prompt";
+  return `
+    <div class="prompt-block">
+      <div class="prompt-block-head">
+        <label for="ta-${esc(id)}">${esc(label)}</label>
+        <span class="badge badge-gold">Edit, then copy</span>
+      </div>
+      <textarea id="ta-${esc(id)}" class="prompt-textarea" spellcheck="false" aria-label="Editable prompt for ${esc(id)}">${esc(prompt)}</textarea>
+      <div class="copy-row">
+        <button class="btn btn-ink btn-sm" data-copy-target="ta-${esc(id)}" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy prompt
+        </button>
+        <span class="copy-confirm" data-copy-confirm="ta-${esc(id)}" role="status">Copied!</span>
+      </div>
+    </div>`;
+}
+
+/* ==================== ROUTING ==================== */
+
+const VIEWS = ["home","finder","tools","rankings","fluency","studio","freepaid","business"];
+
+function setView(name) {
+  if (!VIEWS.includes(name)) name = "home";
+  VIEWS.forEach(function(v) {
+    var el = document.getElementById("view-"+v);
+    if (el) el.classList.toggle("active", v === name);
+  });
+  document.querySelectorAll("[data-nav]").forEach(function(btn) {
+    if (btn.dataset.nav === name) btn.setAttribute("aria-current","page");
+    else btn.removeAttribute("aria-current");
+  });
+  try { window.scrollTo(0,0); } catch(e) {}
+  var m = document.getElementById("main");
+  if (m) { try { m.focus({preventScroll:true}); } catch(e) { try { m.focus(); } catch(e2) {} } }
+  try { if (location.hash !== "#"+name && history && history.replaceState) history.replaceState(null,"","#"+name); } catch(e) {}
+}
+
+/* ==================== INIT ==================== */
+
+function initApp() {
+  // Nav wiring
+  document.querySelectorAll("[data-nav]").forEach(function(btn) {
+    btn.addEventListener("click", function() { if (btn.dataset.nav) setView(btn.dataset.nav); });
+  });
+  var brand = document.getElementById("brandLink");
+  if (brand) brand.addEventListener("click", function(e) { e.preventDefault(); setView("home"); });
+
+  // Renderers
+  try { renderTaskFilters(); }  catch(e) {}
+  try { renderTasks(); }        catch(e) {}
+  try { renderTools(); }        catch(e) {}
+  try { renderBuilders(); }     catch(e) {}
+  try { renderAutomationTools(); } catch(e) {}
+  try { renderAcademicTools(); } catch(e) {}
+  try { renderSubtabs(); }      catch(e) {}
+  try { renderRankFilters(); }  catch(e) {}
+  try { renderRankings(); }     catch(e) {}
+  try { renderCategoryTabs(); } catch(e) {}
+  try { renderPromptList(); }   catch(e) {}
+  try { renderFreePaid(); }     catch(e) {}
+  try { renderBiz(); }          catch(e) {}
+
+  // Task Finder search
+  var search = document.getElementById("finderSearch");
+  var clearBtn = document.getElementById("finderSearchClear");
+  if (search) {
+    search.addEventListener("input", function() {
+      taskSearchQuery = search.value.trim().toLowerCase();
+      if (clearBtn) clearBtn.classList.toggle("visible", taskSearchQuery.length > 0);
+      renderTasks();
+    });
+  }
+  if (clearBtn) {
+    clearBtn.addEventListener("click", function() {
+      if (search) search.value = "";
+      taskSearchQuery = "";
+      clearBtn.classList.remove("visible");
+      renderTasks();
+      if (search) search.focus();
+    });
+  }
+
+  document.addEventListener("click", handleCopyClick);
+
+  // Modal wiring — Privacy Policy + Terms of Use
+  initModals();
+
+  var initial = ((location && location.hash)||"#home").replace("#","");
+  setView(initial);
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}
+
+/* ==================== RENDERERS ==================== */
+
+/* Task Finder filter chips */
+function renderTaskFilters() {
+  var wrap = document.getElementById("taskFilters");
+  if (!wrap) return;
+  wrap.innerHTML = TASK_FILTERS.map(function(f) {
+    return '<button type="button" data-task-filter="'+esc(f.id)+'" aria-pressed="'+(f.id===activeTaskFilter)+'">'+esc(f.label)+'</button>';
+  }).join("");
+  wrap.querySelectorAll("[data-task-filter]").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      activeTaskFilter = btn.getAttribute("data-task-filter") || "all";
+      renderTaskFilters();
+      renderTasks();
+    });
+  });
+}
+
+/* Task Finder grid — filtered + searched */
+function renderTasks() {
+  var grid = document.getElementById("taskGrid");
+  if (!grid) return;
+
+  var allowed = activeTaskFilter === "all" ? null : (TASK_CATEGORIES[activeTaskFilter] || []);
+  var visible = TASKS.filter(function(t) {
+    var passFilter = !allowed || allowed.indexOf(t.id) !== -1;
+    var passSearch = !taskSearchQuery ||
+      t.name.toLowerCase().indexOf(taskSearchQuery) !== -1 ||
+      t.short.toLowerCase().indexOf(taskSearchQuery) !== -1 ||
+      t.bestTool.toLowerCase().indexOf(taskSearchQuery) !== -1;
+    return passFilter && passSearch;
+  });
+
+  var empty = document.getElementById("taskEmpty");
+  if (empty) empty.hidden = visible.length > 0;
+
+  grid.innerHTML = visible.map(function(t) {
+    var num = String(TASKS.findIndex(function(x){return x.id===t.id;})+1).padStart(2,"0");
+    return '<button class="task-card" role="listitem" data-task="'+esc(t.id)+'" type="button" aria-label="View recommendation for: '+esc(t.name)+'">'
+      +'<span class="task-num">Task '+num+'</span>'
+      +'<span class="task-title">'+esc(t.name)+'</span>'
+      +'<span class="task-meta">'+esc(t.short)+'</span>'
+      +'</button>';
+  }).join("");
+
+  grid.querySelectorAll("[data-task]").forEach(function(btn) {
+    btn.addEventListener("click", function() { showTaskResult(btn.dataset.task); });
+  });
+}
+
+/* Task result panel — inline on desktop, slide-up drawer on mobile */
+function isMobile() { return window.innerWidth < 700; }
+
+function openResultDrawer(panel) {
+  var backdrop = document.getElementById("resultBackdrop");
+  panel.hidden = false;
+  // Next frame so display:none→block transition fires
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      if (isMobile()) {
+        panel.classList.add("drawer-open");
+        if (backdrop) { backdrop.classList.add("open"); backdrop.setAttribute("aria-hidden","false"); }
+        document.body.style.overflow = "hidden";
+      } else {
+        try { panel.scrollIntoView({behavior:"smooth",block:"start"}); } catch(e) { try { panel.scrollIntoView(); } catch(e2) {} }
+      }
+    });
+  });
+}
+
+function closeResultDrawer() {
+  var panel    = document.getElementById("resultPanel");
+  var backdrop = document.getElementById("resultBackdrop");
+  if (panel) {
+    panel.classList.remove("drawer-open");
+    if (isMobile()) {
+      // Wait for transition before hiding
+      setTimeout(function() { panel.hidden = true; }, 300);
+    } else {
+      panel.hidden = true;
+    }
+  }
+  if (backdrop) { backdrop.classList.remove("open"); backdrop.setAttribute("aria-hidden","true"); }
+  document.body.style.overflow = "";
+}
+
+function showTaskResult(id) {
+  var t = TASKS.find(function(x){return x.id===id;});
+  var panel = document.getElementById("resultPanel");
+  if (!t || !panel) return;
+  panel.innerHTML = '<div class="result-panel-head">'
+    +'<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">'
+    +'<span class="badge badge-ink">Recommendation</span>'
+    +'<span class="badge badge-success">Free first</span>'
+    +'</div>'
+    +'<button class="result-dismiss" id="resultDismiss" type="button" aria-label="Close recommendation">'
+    +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Close</button>'
+    +'</div>'
+    +'<h3 style="font-size:1.4rem;margin-bottom:var(--space-3);">'+esc(t.name)+'</h3>'
+    +'<p>'+esc(t.why)+'</p>'
+    +'<div class="result-grid">'
+    +'<div class="info-tile"><div class="label">Best tool</div><div class="value">'+esc(t.bestTool)+'</div></div>'
+    +'<div class="info-tile"><div class="label">Backup tool</div><div class="value">'+esc(t.backup)+'</div></div>'
+    +'</div>'
+    +'<div class="info-tile" style="background:var(--green-soft);border-color:rgba(31,122,77,0.2);margin-bottom:var(--space-4);">'
+    +'<div class="label" style="color:var(--green);">Free vs paid tip</div>'
+    +'<div class="value">'+esc(t.fpTip)+'</div>'
+    +'</div>'
+    +promptBlockHTML("task-"+t.id, t.prompt, "Editable prompt");
+
+  openResultDrawer(panel);
+
+  // Dismiss button
+  var dismiss = document.getElementById("resultDismiss");
+  if (dismiss) { dismiss.addEventListener("click", closeResultDrawer); }
+
+  // Backdrop tap closes drawer
+  var backdrop = document.getElementById("resultBackdrop");
+  if (backdrop) {
+    backdrop.onclick = function() { closeResultDrawer(); };
+  }
+}
+
+/* Tool card HTML (shared by Core, Builders, Academic) */
+function toolCardHTML(tool) {
+  var openLink = tool.url
+    ? '<a class="open-tool-link" href="'+esc(tool.url)+'" target="_blank" rel="noopener noreferrer" aria-label="Open '+esc(tool.name)+' in a new tab">Open tool <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a>'
+    : "";
+  var noteBlock = tool.note
+    ? '<div class="tool-note"><strong>Note:</strong> '+esc(tool.note)+'</div>'
+    : "";
+  return '<article class="card tool-card">'
+    +'<h3><span class="tool-logo" style="background:'+esc(tool.color)+';" aria-hidden="true">'+esc(tool.initials)+'</span>'
+    +'<span class="tool-name">'+esc(tool.name)+'</span>'+openLink+'</h3>'
+    +'<dl class="tool-row">'
+    +'<dt>Best for</dt><dd>'+esc(tool.bestFor)+'</dd>'
+    +'<dt>Use it when</dt><dd>'+esc(tool.useWhen)+'</dd>'
+    +'<dt>Not best for</dt><dd>'+esc(tool.notFor)+'</dd>'
+    +'</dl>'
+    +'<div class="tool-footer"><span class="badge badge-success">Free: '+esc(tool.free)+'</span></div>'
+    +'<div class="tool-footer" style="border-top:0;padding-top:6px;"><span class="badge badge-warn">Paid: '+esc(tool.paid)+'</span></div>'
+    +'<p style="margin-top:var(--space-3);font-size:0.88rem;"><strong style="color:var(--ink);">Best user type:</strong> '+esc(tool.user)+'</p>'
+    +noteBlock+'</article>';
+}
+
+function renderTools()         { var g=document.getElementById("toolsGrid");    if(g) g.innerHTML=TOOLS.map(toolCardHTML).join(""); }
+function renderBuilders()      { var g=document.getElementById("buildersGrid"); if(g) g.innerHTML=BUILDERS.map(toolCardHTML).join(""); }
+function renderAcademicTools() { var g=document.getElementById("academicGrid"); if(g) g.innerHTML=ACADEMIC_TOOLS.map(toolCardHTML).join(""); }
+
+function renderAutomationTools() {
+  var g = document.getElementById("automationGrid");
+  if (g) g.innerHTML = AUTOMATION_TOOLS.map(toolCardHTML).join("");
+  var chips = document.getElementById("automationExamples");
+  if (chips) {
+    chips.innerHTML = AUTOMATION_EXAMPLES.map(function(ex) {
+      return '<span class="automation-chip">'+esc(ex)+'</span>';
+    }).join("");
+  }
+}
+
+/* Tools sub-tabs */
+function renderSubtabs() {
+  document.querySelectorAll("[data-subtab]").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var id = btn.getAttribute("data-subtab");
+      document.querySelectorAll("[data-subtab]").forEach(function(b) { b.setAttribute("aria-selected","false"); });
+      btn.setAttribute("aria-selected","true");
+      document.querySelectorAll(".subtab-panel").forEach(function(p) { p.classList.remove("active"); });
+      var panel = document.getElementById("subtab-"+id);
+      if (panel) panel.classList.add("active");
+    });
+  });
+}
+
+/* ==================== POWER RANKINGS ==================== */
+
+/* SVG icon map for ranking categories */
+function rankIconSVG(icon) {
+  var icons = {
+    "code":        '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+    "search":      '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+    "zap":         '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+    "target":      '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    "image":       '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+    "trending-up": '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+    "edit":        '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+    "layers":      '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>'
+  };
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+( icons[icon]||icons["zap"] )+'</svg>';
+}
+
+function rankCardHTML(r) {
+  var toolChips = function(arr, cls) {
+    return arr.map(function(name) {
+      return '<span class="rank-tool-chip '+cls+'"><span class="dot" aria-hidden="true"></span>'+esc(name)+'</span>';
+    }).join("");
+  };
+  return '<article class="rank-card">'
+    +'<div class="rank-card-head">'
+    +'<div class="rank-icon">'+rankIconSVG(r.icon)+'</div>'
+    +'<div><h3>'+esc(r.label)+'</h3><p>'+esc(r.desc)+'</p></div>'
+    +'</div>'
+    +'<div class="rank-card-body">'
+    +'<div class="rank-tier-group">'
+    +'<div class="rank-tier-label"><span class="rank-badge great">Great</span></div>'
+    +'<div class="rank-tools-row">'+toolChips(r.great,"great")+'</div>'
+    +'</div>'
+    +'<div class="rank-tier-group">'
+    +'<div class="rank-tier-label"><span class="rank-badge good">Good</span></div>'
+    +'<div class="rank-tools-row">'+toolChips(r.good,"good")+'</div>'
+    +'</div>'
+    +'<div class="rank-tier-group">'
+    +'<div class="rank-tier-label"><span class="rank-badge learning">Learning</span></div>'
+    +'<div class="rank-tools-row">'+toolChips(r.learning,"learning")+'</div>'
+    +'</div>'
+    +'</div></article>';
+}
+
+function renderRankFilters() {
+  var wrap = document.getElementById("rankFilters");
+  if (!wrap) return;
+  wrap.innerHTML = RANK_FILTERS.map(function(f) {
+    return '<button type="button" data-rank-filter="'+esc(f.id)+'" aria-pressed="'+(f.id===activeRankFilter)+'">'+esc(f.label)+'</button>';
+  }).join("");
+  wrap.querySelectorAll("[data-rank-filter]").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      activeRankFilter = btn.getAttribute("data-rank-filter") || "all";
+      renderRankFilters();
+      renderRankings();
+    });
+  });
+}
+
+function renderRankings() {
+  var grid = document.getElementById("rankingsGrid");
+  if (!grid) return;
+  var allowed = activeRankFilter === "all" ? null : (RANK_FILTER_MAP[activeRankFilter] || []);
+  var visible = allowed ? RANKINGS.filter(function(r){ return allowed.indexOf(r.id) !== -1; }) : RANKINGS;
+  grid.innerHTML = visible.map(rankCardHTML).join("");
+}
+
+/* ==================== PROMPT STUDIO ==================== */
+
+var activeCategory = STUDIO_CATEGORIES[0].id;
+
+function renderCategoryTabs() {
+  var tabs = document.getElementById("categoryTabs");
+  if (!tabs) return;
+  tabs.innerHTML = STUDIO_CATEGORIES.map(function(c) {
+    return '<button type="button" data-cat="'+esc(c.id)+'" aria-pressed="'+(c.id===activeCategory)+'">'+esc(c.label)+'</button>';
+  }).join("");
+  tabs.querySelectorAll("[data-cat]").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      activeCategory = btn.dataset.cat;
+      renderCategoryTabs();
+      renderPromptList();
+    });
+  });
+}
+
+function renderPromptList() {
+  var list = document.getElementById("promptList");
+  if (!list) return;
+  var cat = STUDIO_CATEGORIES.find(function(c){return c.id===activeCategory;});
+  if (!cat) { list.innerHTML=""; return; }
+  var seen = new Set();
+  var items = cat.prompts.map(getStudioEntry).filter(Boolean).filter(function(p){
+    if (seen.has(p.id)) return false; seen.add(p.id); return true;
+  });
+  if (!items.length) { list.innerHTML='<div class="card"><p>No prompts in this category yet.</p></div>'; return; }
+  list.innerHTML = items.map(function(p) {
+    return '<article class="prompt-card">'
+      +'<div class="prompt-card-head"><h3>'+esc(p.title)+'</h3>'
+      +'<span class="badge badge-ink">Best tool: '+esc(p.bestTool)+'</span></div>'
+      +'<p class="prompt-help">'+esc(p.helps)+'</p>'
+      +promptBlockHTML("studio-"+p.id, p.prompt, "Editable prompt")
+      +(p.tip ? '<div class="prompt-tip"><strong>Tip:</strong> '+esc(p.tip)+'</div>' : '')
+      +'</article>';
+  }).join("");
+}
+
+/* ==================== FREE VS PAID ==================== */
+
+function pricingTierLabel(tier) {
+  if (tier==="free") return "Free to Start";
+  if (tier==="sub")  return "Subscription Needed";
+  return "Upgrade When Needed";
+}
+function pricingRowHTML(p) {
+  var tier = p.tier || "upgrade";
+  return '<div class="pay-row"><h4><span class="pricing-badge tier-'+esc(tier)+'">'+esc(pricingTierLabel(tier))+'</span> '+esc(p.name)+'</h4><p>'+esc(p.text)+'</p></div>';
+}
+function renderFreePaid() {
+  var fs = document.getElementById("freeStack");
+  if (fs) fs.innerHTML = FREE_STACK.map(function(item) {
+    return '<li><svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>'+esc(item)+'</li>';
+  }).join("");
+  var ul = document.getElementById("upgradeList");
+  if (ul) ul.innerHTML = UPGRADE_SIGNS.map(function(i){return '<li>'+esc(i)+'</li>';}).join("");
+  var pg = document.getElementById("payGuidance");
+  if (pg) pg.innerHTML = PAID_GUIDANCE.map(pricingRowHTML).join("");
+  var ag = document.getElementById("academicGuidance");
+  if (ag) ag.innerHTML = ACADEMIC_GUIDANCE.map(pricingRowHTML).join("");
+}
+
+/* ==================== AI BUSINESS ==================== */
+
+function renderBiz() {
+  var grid = document.getElementById("bizGrid");
+  if (!grid) return;
+  grid.innerHTML = BIZ_CARDS.map(function(b,i) {
+    return '<article class="biz-card">'
+      +'<div class="num">'+(i+1)+'</div>'
+      +'<h3>'+esc(b.title)+'</h3>'
+      +(b.bestTool ? '<div style="margin-bottom:var(--space-3);"><span class="badge badge-ink">Best tool: '+esc(b.bestTool)+'</span></div>' : '')
+      +'<p style="font-size:0.95rem;">'+esc(b.desc)+'</p>'
+      +promptBlockHTML("biz-"+i, b.prompt, "Editable prompt")
+      +'</article>';
+  }).join("");
+}
+
+/* ==================== COPY LOGIC ==================== */
+
+var toastTimer;
+
+function showToast(msg) {
+  var toast = document.getElementById("toast");
+  if (!toast) return;
+  toast.textContent = msg || "Copied!";
+  toast.classList.add("visible");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toast.classList.remove("visible"); }, 1800);
+}
+
+function copyTextSafe(text) {
+  return new Promise(function(resolve) {
+    if (typeof navigator !== "undefined" && navigator.clipboard &&
+        typeof navigator.clipboard.writeText === "function" && window.isSecureContext) {
+      try {
+        navigator.clipboard.writeText(text).then(
+          function(){ resolve(true); },
+          function(){ resolve(fallbackCopy(text)); }
+        );
+        return;
+      } catch(e) { resolve(fallbackCopy(text)); return; }
+    }
+    resolve(fallbackCopy(text));
+  });
+}
+
+function fallbackCopy(text) {
+  try {
+    var temp = document.createElement("textarea");
+    temp.value = text;
+    temp.setAttribute("readonly","");
+    temp.style.cssText = "position:fixed;top:0;left:0;opacity:0;pointer-events:none;";
+    document.body.appendChild(temp);
+    temp.focus(); temp.select();
+    if (temp.setSelectionRange) try { temp.setSelectionRange(0,text.length); } catch(e) {}
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch(e) { ok=false; }
+    document.body.removeChild(temp);
+    return ok;
+  } catch(e) { return false; }
+}
+
+function findConfirmEl(targetId) {
+  var nodes = document.querySelectorAll("[data-copy-confirm]");
+  for (var i=0;i<nodes.length;i++) {
+    if (nodes[i].getAttribute("data-copy-confirm")===targetId) return nodes[i];
+  }
+  return null;
+}
+
+function handleCopyClick(e) {
+  var target = e && e.target ? e.target : null;
+  if (!target) return;
+  var btn = null, node = target;
+  while (node && node !== document) {
+    if (node.getAttribute && node.getAttribute("data-copy-target")) { btn=node; break; }
+    node = node.parentNode;
+  }
+  if (!btn) return;
+  var targetId = btn.getAttribute("data-copy-target");
+  if (!targetId) return;
+  var ta = document.getElementById(targetId);
+  if (!ta) return;
+  var text = ta.value || "";
+  copyTextSafe(text).then(function(ok) {
+    var confirmEl = findConfirmEl(targetId);
+    if (confirmEl) {
+      confirmEl.textContent = ok ? "Copied!" : "Press Ctrl+C to copy";
+      confirmEl.classList.add("visible");
+      setTimeout(function(){ confirmEl.classList.remove("visible"); }, 1800);
+    }
+    showToast(ok ? "Copied to clipboard!" : "Couldn't copy — select text and press Ctrl+C");
+  });
+}
+
+/* ==================== MODAL LOGIC ==================== */
+
+function openModal(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add("open");
+  // Move focus to the close button for accessibility
+  var closeBtn = el.querySelector(".modal-close");
+  if (closeBtn) setTimeout(function(){ closeBtn.focus(); }, 60);
+  // Prevent body scroll on mobile
+  document.body.style.overflow = "hidden";
+  // Close on backdrop click
+  el.addEventListener("click", function onBackdrop(e) {
+    if (e.target === el) { closeModal(id); el.removeEventListener("click", onBackdrop); }
+  });
+}
+
+function closeModal(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function initModals() {
+  // Open triggers
+  var privBtn = document.getElementById("openPrivacy");
+  var termsBtn = document.getElementById("openTerms");
+  if (privBtn)  privBtn.addEventListener("click",  function(){ openModal("modalPrivacy"); });
+  if (termsBtn) termsBtn.addEventListener("click", function(){ openModal("modalTerms"); });
+
+  // Close triggers (data-close-modal attribute)
+  document.querySelectorAll("[data-close-modal]").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      closeModal(btn.getAttribute("data-close-modal"));
+    });
+  });
+
+  // Close on Escape key
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+      closeModal("modalPrivacy");
+      closeModal("modalTerms");
+      closeResultDrawer();
+    }
+  });
+}
+</script>
+</body>
+</html>
